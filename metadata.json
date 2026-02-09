@@ -1,0 +1,7 @@
+{
+  "name": "SIMCT de Hortolândia - ATUALIZADO",
+  "description": "Sistema Integrado com Inteligência Artificial para análise de violações e gestão de prontuários.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
