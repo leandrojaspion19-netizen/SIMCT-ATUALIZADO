@@ -187,7 +187,11 @@ const App: React.FC = () => {
     }
 
     switch (activeTab) {
-      case 'dashboard': return <DocumentList documents={documents} currentUser={currentUser} isReadOnly={isAdministrative} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
+      case 'dashboard': 
+        return <DocumentList documents={documents} currentUser={currentUser} isReadOnly={false} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
+      case 'my-docs':
+        const myReferencedDocs = documents.filter(d => d.conselheiro_referencia_id === currentUser.id || d.conselheiro_providencia_id === currentUser.id);
+        return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
       case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={setSelectedDocId} onUpdateMonitoring={(id, m) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); addLog(id, "Prorrogação de prazo registrada."); }} onRemoveMonitoring={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} isReadOnly={isAdministrative} />;
       case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={isLud || currentUser.perfil === 'ADMINISTRATIVO'} />;
       case 'search': return <AdvancedSearch documents={documents} currentUser={currentUser} onSelectDoc={setSelectedDocId} />;

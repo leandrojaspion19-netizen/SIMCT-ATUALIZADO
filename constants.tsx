@@ -1,3 +1,4 @@
+
 import { User, Documento, Log, ViolenceType } from './types';
 
 export interface UserWithPassword extends User {
@@ -17,74 +18,68 @@ export const INITIAL_USERS: UserWithPassword[] = [
   { id: 'suplente1', nome: 'ROSILDA', perfil: 'SUPLENTE', cargo: 'Conselheira Suplente', senha: '123456', status: 'INATIVO' },
 ];
 
-export const FERIADOS_HORTOLANDIA = [
-  '01-01', // Ano Novo
-  '20-01', // São Sebastião (Padroeiro)
-  '21-04', // Tiradentes
-  '01-05', // Dia do Trabalho
-  '19-05', // Aniversário de Hortolândia
-  '07-09', // Independência
-  '12-10', // Aparecida
-  '02-11', // Finados
-  '15-11', // Proclamação
-  '20-11', // Zumbi
-  '25-12', // Natal
-];
-
-export const checkIsPlantao = (dateStr: string, timeStr: string): 'PLANTAO' | 'COMERCIAL' => {
-  const date = new Date(dateStr + 'T12:00:00');
-  const dayOfWeek = date.getDay(); // 0 = Domingo, 6 = Sábado
-  const monthDay = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-  
-  // Fim de semana é plantão
-  if (dayOfWeek === 0 || dayOfWeek === 6) return 'PLANTAO';
-  
-  // Feriado é plantão
-  if (FERIADOS_HORTOLANDIA.includes(monthDay)) return 'PLANTAO';
-  
-  // Fora do horário comercial (08:00 às 17:00)
-  if (timeStr) {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes;
-    const morningLimit = 8 * 60; // 08:00
-    const eveningLimit = 17 * 60; // 17:00
-    
-    if (totalMinutes < morningLimit || totalMinutes > eveningLimit) {
-      return 'PLANTAO';
-    }
-  }
-  
-  return 'COMERCIAL';
-};
-
-export const GENDER_LABELS: Record<string, string> = {
-  'M': 'MASCULINO',
-  'F': 'FEMININO',
-  'NB': 'NÃO BINÁRIO',
-  'T': 'TRANSGÊNERO',
-  'I': 'INTERSEXO',
-  'OUTRO': 'OUTRO'
-};
-
 export const ANNUAL_ESCALA: Record<string, Record<number, string[]>> = {
+  '2025-12': {
+    1: ['LEANDRO', 'MIRIAN', 'MILENA'], 2: ['SANDRA', 'LUIZA', 'MIRIAN'], 3: ['MILENA', 'LEANDRO', 'LUIZA'], 4: ['LUIZA', 'SANDRA', 'LEANDRO'], 5: ['MIRIAN', 'MILENA', 'SANDRA'], 6: ['MIRIAN'], 7: ['MIRIAN'], 8: ['SANDRA', 'LEANDRO', 'LUIZA'], 9: ['MILENA', 'MIRIAN', 'LEANDRO'], 10: ['LUIZA', 'SANDRA', 'MIRIAN'], 11: ['MIRIAN', 'MILENA', 'SANDRA'], 12: ['LEANDRO', 'LUIZA', 'MILENA'], 13: ['LEANDRO'], 14: ['LEANDRO'], 15: ['MILENA', 'SANDRA', 'MIRIAN'], 16: ['LUIZA', 'LEANDRO', 'SANDRA'], 17: ['MIRIAN', 'MILENA', 'LEANDRO'], 18: ['LEANDRO', 'LUIZA', 'MILENA'], 19: ['SANDRA', 'MIRIAN', 'LUIZA'], 20: ['SANDRA'], 21: ['SANDRA'], 22: ['LUIZA', 'MILENA', 'LEANDRO'], 23: ['MIRIAN', 'SANDRA', 'MILENA'], 24: ['LEANDRO', 'LUIZA', 'SANDRA'], 25: ['SANDRA', 'MIRIAN', 'LUIZA'], 26: ['MILENA', 'LEANDRO', 'MIRIAN'], 27: ['MILENA'], 28: ['MILENA'], 29: ['MIRIAN', 'LUIZA', 'SANDRA'], 30: ['LEANDRO', 'MILENA', 'LUIZA'], 31: ['SANDRA', 'MIRIAN', 'MILENA']
+  },
   '2026-02': {
     1: ['MILENA'], 2: ['MIRIAN', 'LUIZA', 'SANDRA'], 3: ['LEANDRO', 'MILENA', 'LUIZA'], 4: ['SANDRA', 'MIRIAN', 'MILENA'], 5: ['MILENA', 'LEANDRO', 'MIRIAN'], 6: ['LUIZA', 'SANDRA', 'LEANDRO'], 7: ['LUIZA'], 8: ['LUIZA'], 9: ['LEANDRO', 'MIRIAN', 'MILENA'], 10: ['SANDRA', 'LUIZA', 'MIRIAN'], 11: ['MILENA', 'LEANDRO', 'LUIZA'], 12: ['LUIZA', 'SANDRA', 'LEANDRO'], 13: ['MIRIAN', 'MILENA', 'SANDRA'], 14: ['MIRIAN'], 15: ['MIRIAN'], 16: ['SANDRA', 'LEANDRO', 'LUIZA'], 17: ['MILENA', 'MIRIAN', 'LEANDRO'], 18: ['LUIZA', 'SANDRA', 'MIRIAN'], 19: ['MIRIAN', 'MILENA', 'SANDRA'], 20: ['LEANDRO', 'LUIZA', 'MILENA'], 21: ['LEANDRO'], 22: ['LEANDRO'], 23: ['MILENA', 'SANDRA', 'MIRIAN'], 24: ['LUIZA', 'LEANDRO', 'SANDRA'], 25: ['MIRIAN', 'MILENA', 'LEANDRO'], 26: ['LEANDRO', 'LUIZA', 'MILENA'], 27: ['SANDRA', 'MIRIAN', 'LUIZA'], 28: ['SANDRA']
   },
   '2026-03': {
     1: ['SANDRA'], 2: ['LUIZA', 'MILENA', 'LEANDRO'], 3: ['MIRIAN', 'SANDRA', 'MILENA'], 4: ['LEANDRO', 'LUIZA', 'SANDRA'], 5: ['SANDRA', 'MIRIAN', 'LUIZA'], 6: ['MILENA', 'LEANDRO', 'MIRIAN'], 7: ['MILENA'], 8: ['MILENA'], 9: ['MIRIAN', 'LUIZA', 'SANDRA'], 10: ['LEANDRO', 'MILENA', 'LUIZA'], 11: ['SANDRA', 'MIRIAN', 'MILENA'], 12: ['MILENA', 'LEANDRO', 'MIRIAN'], 13: ['LUIZA', 'SANDRA', 'LEANDRO'], 14: ['LUIZA'], 15: ['LUIZA'], 16: ['LEANDRO', 'MIRIAN', 'MILENA'], 17: ['SANDRA', 'LUIZA', 'MIRIAN'], 18: ['MILENA', 'LEANDRO', 'LUIZA'], 19: ['LUIZA', 'SANDRA', 'LEANDRO'], 20: ['MIRIAN', 'MILENA', 'SANDRA'], 21: ['MIRIAN'], 22: ['MIRIAN'], 23: ['SANDRA', 'LEANDRO', 'LUIZA'], 24: ['MILENA', 'MIRIAN', 'LEANDRO'], 25: ['LUIZA', 'SANDRA', 'MIRIAN'], 26: ['MIRIAN', 'MILENA', 'SANDRA'], 27: ['LEANDRO', 'LUIZA', 'MILENA'], 28: ['LEANDRO'], 29: ['LEANDRO'], 30: ['MILENA', 'SANDRA', 'MIRIAN'], 31: ['LUIZA', 'LEANDRO', 'SANDRA']
+  },
+  '2026-04': {
+    1: ['MIRIAN', 'MILENA', 'LEANDRO'], 2: ['LEANDRO', 'LUIZA', 'MILENA'], 3: ['SANDRA', 'MIRIAN', 'LUIZA'], 4: ['SANDRA'], 5: ['SANDRA'], 6: ['LUIZA', 'MILENA', 'LEANDRO'], 7: ['MIRIAN', 'SANDRA', 'MILENA'], 8: ['LEANDRO', 'LUIZA', 'SANDRA'], 9: ['SANDRA', 'MIRIAN', 'LUIZA'], 10: ['MILENA', 'LEANDRO', 'MIRIAN'], 11: ['MILENA'], 12: ['MILENA'], 13: ['MIRIAN', 'LUIZA', 'SANDRA'], 14: ['LEANDRO', 'MILENA', 'LUIZA'], 15: ['SANDRA', 'MIRIAN', 'MILENA'], 16: ['MILENA', 'LEANDRO', 'MIRIAN'], 17: ['LUIZA', 'SANDRA', 'LEANDRO'], 18: ['LUIZA'], 19: ['LUIZA'], 20: ['LEANDRO', 'MIRIAN', 'MILENA'], 21: ['SANDRA', 'LUIZA', 'MIRIAN'], 22: ['MILENA', 'LEANDRO', 'LUIZA'], 23: ['LUIZA', 'SANDRA', 'LEANDRO'], 24: ['MIRIAN', 'MILENA', 'SANDRA'], 25: ['MIRIAN'], 26: ['MIRIAN'], 27: ['SANDRA', 'LEANDRO', 'LUIZA'], 28: ['MILENA', 'MIRIAN', 'LEANDRO'], 29: ['LUIZA', 'SANDRA', 'MIRIAN'], 30: ['MIRIAN', 'MILENA', 'SANDRA']
+  },
+  '2026-05': {
+    1: ['LEANDRO', 'LUIZA', 'MILENA'], 2: ['LEANDRO'], 3: ['LEANDRO'], 4: ['MILENA', 'SANDRA', 'MIRIAN'], 5: ['LUIZA', 'LEANDRO', 'SANDRA'], 6: ['MIRIAN', 'MILENA', 'LEANDRO'], 7: ['LEANDRO', 'LUIZA', 'MILENA'], 8: ['SANDRA', 'MIRIAN', 'LUIZA'], 9: ['SANDRA'], 10: ['SANDRA'], 11: ['LUIZA', 'MILENA', 'LEANDRO'], 12: ['MIRIAN', 'SANDRA', 'MILENA'], 13: ['LEANDRO', 'LUIZA', 'SANDRA'], 14: ['SANDRA', 'MIRIAN', 'LUIZA'], 15: ['MILENA', 'LEANDRO', 'MIRIAN'], 16: ['MILENA'], 17: ['MILENA'], 18: ['MIRIAN', 'LUIZA', 'SANDRA'], 19: ['LEANDRO', 'MILENA', 'LUIZA'], 20: ['SANDRA', 'MIRIAN', 'MILENA'], 21: ['MILENA', 'LEANDRO', 'MIRIAN'], 22: ['LUIZA', 'SANDRA', 'LEANDRO'], 23: ['LUIZA'], 24: ['LUIZA'], 25: ['LEANDRO', 'MIRIAN', 'MILENA'], 26: ['SANDRA', 'LUIZA', 'MIRIAN'], 27: ['MILENA', 'LEANDRO', 'LUIZA'], 28: ['LUIZA', 'SANDRA', 'LEANDRO'], 29: ['MIRIAN', 'MILENA', 'SANDRA'], 30: ['MIRIAN']
+  },
+  '2026-06': {
+    1: ['SANDRA', 'LEANDRO', 'LUIZA'], 2: ['MILENA', 'MIRIAN', 'LEANDRO'], 3: ['LUIZA', 'SANDRA', 'MIRIAN'], 4: ['MIRIAN', 'MILENA', 'SANDRA'], 5: ['LEANDRO', 'LUIZA', 'MILENA'], 6: ['LEANDRO'], 7: ['LEANDRO'], 8: ['MILENA', 'SANDRA', 'MIRIAN'], 9: ['LUIZA', 'LEANDRO', 'SANDRA'], 10: ['MIRIAN', 'MILENA', 'LEANDRO'], 11: ['LEANDRO', 'LUIZA', 'MILENA'], 12: ['SANDRA', 'MIRIAN', 'LUIZA'], 13: ['SANDRA'], 14: ['SANDRA'], 15: ['LUIZA', 'MILENA', 'LEANDRO'], 16: ['MIRIAN', 'SANDRA', 'MILENA'], 17: ['LEANDRO', 'LUIZA', 'SANDRA'], 18: ['SANDRA', 'MIRIAN', 'LUIZA'], 19: ['MILENA', 'LEANDRO', 'MIRIAN'], 20: ['MILENA'], 21: ['MILENA'], 22: ['MIRIAN', 'LUIZA', 'SANDRA'], 23: ['LEANDRO', 'MILENA', 'LUIZA'], 24: ['SANDRA', 'MIRIAN', 'MILENA'], 25: ['MILENA', 'LEANDRO', 'MIRIAN'], 26: ['LUIZA', 'SANDRA', 'LEANDRO'], 27: ['LUIZA'], 28: ['LUIZA'], 29: ['LEANDRO', 'MIRIAN', 'MILENA'], 30: ['SANDRA', 'LUIZA', 'MIRIAN']
+  },
+  '2026-07': {
+    1: ['MILENA', 'LEANDRO', 'LUIZA'], 2: ['LUIZA', 'SANDRA', 'LEANDRO'], 3: ['MIRIAN', 'MILENA', 'SANDRA'], 4: ['MIRIAN'], 5: ['MIRIAN'], 6: ['SANDRA', 'LEANDRO', 'LUIZA'], 7: ['MILENA', 'MIRIAN', 'LEANDRO'], 8: ['LUIZA', 'SANDRA', 'MIRIAN'], 9: ['MIRIAN', 'MILENA', 'SANDRA'], 10: ['LEANDRO', 'LUIZA', 'MILENA'], 11: ['LEANDRO'], 12: ['LEANDRO'], 13: ['MILENA', 'SANDRA', 'MIRIAN'], 14: ['LUIZA', 'LEANDRO', 'SANDRA'], 15: ['MIRIAN', 'MILENA', 'LEANDRO'], 16: ['LEANDRO', 'LUIZA', 'MILENA'], 17: ['SANDRA', 'MIRIAN', 'LUIZA'], 18: ['SANDRA'], 19: ['SANDRA'], 20: ['LUIZA', 'MILENA', 'LEANDRO'], 21: ['MIRIAN', 'SANDRA', 'MILENA'], 22: ['LEANDRO', 'LUIZA', 'SANDRA'], 23: ['SANDRA', 'MIRIAN', 'LUIZA'], 24: ['MILENA', 'LEANDRO', 'MIRIAN'], 25: ['MILENA'], 26: ['MILENA'], 27: ['MIRIAN', 'LUIZA', 'SANDRA'], 28: ['LEANDRO', 'MILENA', 'LUIZA'], 29: ['SANDRA', 'MIRIAN', 'MILENA'], 30: ['MILENA', 'LEANDRO', 'MIRIAN'], 31: ['LUIZA', 'SANDRA', 'LEANDRO']
+  },
+  '2026-08': {
+    1: ['LUIZA'], 2: ['LUIZA'], 3: ['LEANDRO', 'MIRIAN', 'MILENA'], 4: ['SANDRA', 'LUIZA', 'MIRIAN'], 5: ['MILENA', 'LEANDRO', 'LUIZA'], 6: ['LUIZA', 'SANDRA', 'LEANDRO'], 7: ['MIRIAN', 'MILENA', 'SANDRA'], 8: ['MIRIAN'], 9: ['MIRIAN'], 10: ['SANDRA', 'LEANDRO', 'LUIZA'], 11: ['MILENA', 'MIRIAN', 'LEANDRO'], 12: ['LUIZA', 'SANDRA', 'MIRIAN'], 13: ['MIRIAN', 'MILENA', 'SANDRA'], 14: ['LEANDRO', 'LUIZA', 'MILENA'], 15: ['LEANDRO'], 16: ['LEANDRO'], 17: ['MILENA', 'SANDRA', 'MIRIAN'], 18: ['LUIZA', 'LEANDRO', 'SANDRA'], 19: ['MIRIAN', 'MILENA', 'LEANDRO'], 20: ['LEANDRO', 'LUIZA', 'MILENA'], 21: ['SANDRA', 'MIRIAN', 'LUIZA'], 22: ['SANDRA'], 23: ['SANDRA'], 24: ['LUIZA', 'MILENA', 'LEANDRO'], 25: ['MIRIAN', 'SANDRA', 'MILENA'], 26: ['LEANDRO', 'LUIZA', 'SANDRA'], 27: ['SANDRA', 'MIRIAN', 'LUIZA'], 28: ['MILENA', 'LEANDRO', 'MIRIAN'], 29: ['MILENA'], 30: ['MILENA'], 31: ['MIRIAN', 'LUIZA', 'SANDRA']
+  },
+  '2026-09': {
+    1: ['LEANDRO', 'MILENA', 'LUIZA'], 2: ['SANDRA', 'MIRIAN', 'MILENA'], 3: ['MILENA', 'LEANDRO', 'MIRIAN'], 4: ['LUIZA', 'SANDRA', 'LEANDRO'], 5: ['LUIZA'], 6: ['LUIZA'], 7: ['LEANDRO', 'MIRIAN', 'MILENA'], 8: ['SANDRA', 'LUIZA', 'MIRIAN'], 9: ['MILENA', 'LEANDRO', 'LUIZA'], 10: ['LUIZA', 'SANDRA', 'LEANDRO'], 11: ['MIRIAN', 'MILENA', 'SANDRA'], 12: ['MIRIAN'], 13: ['MIRIAN'], 14: ['SANDRA', 'LEANDRO', 'LUIZA'], 15: ['MILENA', 'MIRIAN', 'LEANDRO'], 16: ['LUIZA', 'SANDRA', 'MIRIAN'], 17: ['MIRIAN', 'MILENA', 'SANDRA'], 18: ['LEANDRO', 'LUIZA', 'MILENA'], 19: ['LEANDRO'], 20: ['LEANDRO'], 21: ['MILENA', 'SANDRA', 'MIRIAN'], 22: ['LUIZA', 'LEANDRO', 'SANDRA'], 23: ['MIRIAN', 'MILENA', 'LEANDRO'], 24: ['LEANDRO', 'LUIZA', 'MILENA'], 25: ['SANDRA', 'MIRIAN', 'LUIZA'], 26: ['SANDRA'], 27: ['SANDRA'], 28: ['LUIZA', 'MILENA', 'LEANDRO'], 29: ['MIRIAN', 'SANDRA', 'MILENA'], 30: ['LEANDRO', 'LUIZA', 'SANDRA']
+  },
+  '2026-10': {
+    1: ['SANDRA', 'MIRIAN', 'LUIZA'], 2: ['MILENA', 'LEANDRO', 'MIRIAN'], 3: ['MILENA'], 4: ['MILENA'], 5: ['MIRIAN', 'LUIZA', 'SANDRA'], 6: ['LEANDRO', 'MILENA', 'LUIZA'], 7: ['SANDRA', 'MIRIAN', 'MILENA'], 8: ['MILENA', 'LEANDRO', 'MIRIAN'], 9: ['LUIZA', 'SANDRA', 'LEANDRO'], 10: ['LUIZA'], 11: ['LUIZA'], 12: ['LEANDRO', 'MIRIAN', 'MILENA'], 13: ['SANDRA', 'LUIZA', 'MIRIAN'], 14: ['MILENA', 'LEANDRO', 'LUIZA'], 15: ['LUIZA', 'SANDRA', 'LEANDRO'], 16: ['MIRIAN', 'MILENA', 'SANDRA'], 17: ['MIRIAN'], 18: ['MIRIAN'], 19: ['SANDRA', 'LEANDRO', 'LUIZA'], 20: ['MILENA', 'MIRIAN', 'LEANDRO'], 21: ['LUIZA', 'SANDRA', 'MIRIAN'], 22: ['MIRIAN', 'MILENA', 'SANDRA'], 23: ['LEANDRO', 'LUIZA', 'MILENA'], 24: ['LEANDRO'], 25: ['LEANDRO'], 26: ['MILENA', 'SANDRA', 'MIRIAN'], 27: ['LUIZA', 'LEANDRO', 'SANDRA'], 28: ['MIRIAN', 'MILENA', 'LEANDRO'], 29: ['LEANDRO', 'LUIZA', 'MILENA'], 30: ['SANDRA', 'MIRIAN', 'LUIZA'], 31: ['SANDRA']
+  },
+  '2026-11': {
+    1: ['SANDRA'], 2: ['LUIZA', 'MILENA', 'LEANDRO'], 3: ['MIRIAN', 'SANDRA', 'MILENA'], 4: ['LEANDRO', 'LUIZA', 'SANDRA'], 5: ['SANDRA', 'MIRIAN', 'LUIZA'], 6: ['MILENA', 'LEANDRO', 'MIRIAN'], 7: ['MILENA'], 8: ['MILENA'], 9: ['MIRIAN', 'LUIZA', 'SANDRA'], 10: ['LEANDRO', 'MILENA', 'LUIZA'], 11: ['SANDRA', 'MIRIAN', 'MILENA'], 12: ['MILENA', 'LEANDRO', 'MIRIAN'], 13: ['LUIZA', 'SANDRA', 'LEANDRO'], 14: ['LUIZA'], 15: ['LUIZA'], 16: ['LEANDRO', 'MIRIAN', 'MILENA'], 17: ['SANDRA', 'LUIZA', 'MIRIAN'], 18: ['MILENA', 'LEANDRO', 'LUIZA'], 19: ['LUIZA', 'SANDRA', 'LEANDRO'], 20: ['MIRIAN', 'MILENA', 'SANDRA'], 21: ['MIRIAN'], 22: ['MIRIAN'], 23: ['SANDRA', 'LEANDRO', 'LUIZA'], 24: ['MILENA', 'MIRIAN', 'LEANDRO'], 25: ['LUIZA', 'SANDRA', 'MIRIAN'], 26: ['MIRIAN', 'MILENA', 'SANDRA'], 27: ['LEANDRO', 'LUIZA', 'MILENA'], 28: ['LEANDRO'], 29: ['LEANDRO'], 30: ['MILENA', 'SANDRA', 'MIRIAN']
   }
 };
 
 export const getEffectiveEscala = (dateStr: string): string[] => {
   if (!dateStr) return [];
   const date = new Date(dateStr + 'T12:00:00');
-  const dayOfWeek = date.getDay(); 
-  let targetDate = new Date(date);
-  if (dayOfWeek === 0) targetDate.setDate(date.getDate() - 2);
-  else if (dayOfWeek === 6) targetDate.setDate(date.getDate() - 1);
-  const yearMonth = `${targetDate.getFullYear()}-${(targetDate.getMonth() + 1).toString().padStart(2, '0')}`;
-  const day = targetDate.getDate();
+  const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+  const day = date.getDate();
   return ANNUAL_ESCALA[yearMonth]?.[day] || [];
+};
+
+export const FERIADOS_HORTOLANDIA = [
+  '01-01', '20-01', '21-04', '01-05', '19-05', '07-09', '12-10', '02-11', '15-11', '20-11', '25-12',
+];
+
+export const checkIsPlantao = (dateStr: string, timeStr: string): 'PLANTAO' | 'COMERCIAL' => {
+  const date = new Date(dateStr + 'T12:00:00');
+  const dayOfWeek = date.getDay();
+  const monthDay = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  if (dayOfWeek === 0 || dayOfWeek === 6 || FERIADOS_HORTOLANDIA.includes(monthDay)) return 'PLANTAO';
+  if (timeStr) {
+    const [hours] = timeStr.split(':').map(Number);
+    if (hours < 8 || hours >= 17) return 'PLANTAO';
+  }
+  return 'COMERCIAL';
+};
+
+export const GENDER_LABELS: Record<string, string> = {
+  'M': 'MASCULINO', 'F': 'FEMININO', 'NB': 'NÃO BINÁRIO', 'T': 'TRANSGÊNERO', 'I': 'INTERSEXO', 'OUTRO': 'OUTRO'
 };
 
 export const TERMOS_CONFORMIDADE_LGPD = `
@@ -106,94 +101,13 @@ export const ORIGENS_CATEGORIZADAS = [
   {
     label: 'EDUCAÇÃO - ESCOLA MUNICIPAL',
     options: [
-      "Ana José Bodini Januário Dona – Escola Municipal de Ensino Fundamental",
-      "Armelinda Espurio da Silva – Escola Municipal de Ensino Fundamental",
-      "Bairro Taquara Branca – EMEIEF",
-      "Bairro Três Casas – Escola Municipal de Educação Infantil",
-      "Caio Fernando Gomes Pereira – Escola Municipal de Ensino Fundamental",
-      "Centro de Educação Básica do Município de Hortolândia",
-      "Centro Integrado de Educação e Reabilitação Municipal",
-      "Claudio Roberto Marques – Professor – Escola Municipal de Ensino Fundamental",
-      "EMEF Jardim Primavera",
-      "EMEF Salvador Zacharias P. Junior (municipal)",
-      "EMEI Carlos Vilela",
-      "EMEI Jardim Minda",
-      "EMEI Jardim Nossa Senhora Auxiliadora",
-      "EMEI Jardim Nosso Senhor da Auxiliadora",
-      "EMEI Jardim Nova Europa",
-      "EMEI Jardim Santa Amélia",
-      "EMEI Jardim Santa Clara do Lago I",
-      "EMEI Jardim Santa Clara do Lago II",
-      "EMEI Jardim Santa Emilia",
-      "EMEI Jardim Santa Esmeralda",
-      "EMEI Jardim Santiago",
-      "EMEI Jardim São Pedro",
-      "EMEI Nicolas Thiago dos Santos Lofrani",
-      "EMEI Residencial São Sebastião II",
-      "EMEI Tarsila do Amaral",
-      "EMEI Vila Real Sebastiana das Dores",
-      "EMEI Villagio Guiraldelli",
-      "EMEIEF Jardim Santa Amélia Humberto de Amorim Lopes",
-      "EMEIEF José Tenório da Silva",
-      "EMEIEF Luiza Vitória Oliveira Cruz",
-      "Emiliano Sanchez – Escola Municipal de Educação Infantil",
-      "Escola Municipal de Educação Básica Josias da Silva Macedo",
-      "Escola Municipal de Educação Básica Richard Chibim Naumann",
-      "Escola Municipal de Educação Infantil Angelita Inocente Nunes Bidutti",
-      "Escola Municipal de Educação Infantil Antonieta Claudine Oliveira Fusaro Catuzzo",
-      "Escola Municipal de Educação Infantil Jardim Interlagos",
-      "Escola Municipal de Educação Infantil Jardim Nossa Senhora de Fátima",
-      "Escola Municipal de Educação Infantil Jardim Novo Cambuí",
-      "Escola Municipal de Educação Infantil Miguel Camillo",
-      "Escola Municipal de Educação Infantil Olinda Maria de Jesus Souza",
-      "Escola Municipal de Educação Infantil Professora Izabel Sostena de Souza",
-      "Escola Municipal de Ensino Fundamental Dayla Cristina Souza de Amorim",
-      "Escola Municipal de Ensino Fundamental Jardim Amanda Caic",
-      "Escola Municipal de Ensino Fundamental Lourenço Daniel Zanardi",
-      "Escola Municipal de Ensino Fundamental Samuel da Silva Mendonça",
-      "Fernanda Grazielle Resende Covre – Escola Municipal de Ensino Fundamental",
-      "Helena Furtado Takahashi – Professora – Escola Municipal de Ensino Fundamental",
-      "Janilde Flores Gaby do Vale – Professora – Escola Municipal de Ensino Fundamental",
-      "Jardim Amanda I – Escola Municipal de Educação Infantil",
-      "Jardim Amanda II – Escola Municipal de Educação Infantil",
-      "Jardim Boa Esperança – EMEF José Roque (unidade municipal)",
-      "João Calixto da Silva – Escola Municipal de Ensino Fundamental",
-      "João Carlos do Amaral Soares – Escola Municipal de Educação Infantil e Fundamental",
-      "Maria Célia Cabral Amaral – Escola Municipal de Ensino Fundamental",
-      "Renato da Costa Lima – Escola Municipal de Ensino Fundamental"
+      "Ana José Bodini Januário Dona – Escola Municipal de Ensino Fundamental", "Armelinda Espurio da Silva – Escola Municipal de Ensino Fundamental", "Bairro Taquara Branca – EMEIEF", "Bairro Três Casas – Escola Municipal de Educação Infantil", "Caio Fernando Gomes Pereira – Escola Municipal de Ensino Fundamental", "Centro de Educação Básica do Município de Hortolândia", "Centro Integrado de Educação e Reabilitação Municipal", "Claudio Roberto Marques – Professor – Escola Municipal de Ensino Fundamental", "EMEF Jardim Primavera", "EMEF Salvador Zacharias P. Junior (municipal)", "EMEI Carlos Vilela", "EMEI Jardim Minda", "EMEI Jardim Nossa Senhora Auxiliadora", "EMEI Jardim Nosso Senhor da Auxiliadora", "EMEI Jardim Nova Europa", "EMEI Jardim Santa Amélia", "EMEI Jardim Santa Clara do Lago I", "EMEI Jardim Santa Clara do Lago II", "EMEI Jardim Santa Emilia", "EMEI Jardim Santa Esmeralda", "EMEI Jardim Santiago", "EMEI Jardim São Pedro", "EMEI Nicolas Thiago dos Santos Lofrani", "EMEI Residencial São Sebastião II", "EMEI Tarsila do Amaral", "EMEI Vila Real Sebastiana das Dores", "EMEI Villagio Guiraldelli", "EMEIEF Jardim Santa Amélia Humberto de Amorim Lopes", "EMEIEF José Tenório da Silva", "EMEIEF Luiza Vitória Oliveira Cruz", "Emiliano Sanchez – Escola Municipal de Educação Infantil", "Escola Municipal de Educação Básica Josias da Silva Macedo", "Escola Municipal de Educação Básica Richard Chibim Naumann", "Escola Municipal de Educação Infantil Angelita Inocente Nunes Bidutti", "Escola Municipal de Educação Infantil Antonieta Claudine Oliveira Fusaro Catuzzo", "Escola Municipal de Educação Infantil Jardim Interlagos", "Escola Municipal de Educação Infantil Jardim Nossa Senhora de Fátima", "Escola Municipal de Educação Infantil Jardim Novo Cambuí", "Escola Municipal de Educação Infantil Miguel Camillo", "Escola Municipal de Educação Infantil Olinda Maria de Jesus Souza", "Escola Municipal de Educação Infantil Professora Izabel Sostena de Souza", "Escola Municipal de Ensino Fundamental Dayla Cristina Souza de Amorim", "Escola Municipal de Ensino Fundamental Jardim Amanda Caic", "Escola Municipal de Ensino Fundamental Lourenço Daniel Zanardi", "Escola Municipal de Ensino Fundamental Samuel da Silva Mendonça", "Fernanda Grazielle Resende Covre – Escola Municipal de Ensino Fundamental", "Helena Furtado Takahashi – Professora – Escola Municipal de Ensino Fundamental", "Janilde Flores Gaby do Vale – Professora – Escola Municipal de Ensino Fundamental", "Jardim Amanda I – Escola Municipal de Educação Infantil", "Jardim Amanda II – Escola Municipal de Educação Infantil", "Jardim Boa Esperança – EMEF José Roque (unidade municipal)", "João Calixto da Silva – Escola Municipal de Ensino Fundamental", "João Carlos do Amaral Soares – Escola Municipal de Educação Infantil e Fundamental", "Maria Célia Cabral Amaral – Escola Municipal de Ensino Fundamental", "Renato da Costa Lima – Escola Municipal de Ensino Fundamental"
     ].sort((a, b) => a.localeCompare(b, 'pt-BR'))
   },
   {
     label: 'EDUCAÇÃO - ESCOLA ESTADUAL',
     options: [
-      "Antonio Zanluchi Professor — Hortolândia-SP",
-      "Cel Jto A EE Liomar Freitas Câmara Profa — Hortolândia-SP",
-      "Centro de Progressão Penitenciária de Hortolândia — Hortolândia-SP",
-      "Conceição Aparecida Terza Gomes Cardinales Professora — Hortolândia-SP",
-      "Cristiane Chaves Moreira Braga Professora — Hortolândia-SP",
-      "Eliseo Marson Professor — Hortolândia-SP",
-      "ETEC de Hortolândia (Escola Técnica Estadual)",
-      "Euzebio Antonio Rodrigues Professor — Hortolândia-SP",
-      "Guido Rosolen — Hortolândia-SP",
-      "Hedy Madalena Bocchi Professora — Hortolândia-SP",
-      "Honorino Fabbri Doutor — Hortolândia-SP",
-      "Jardim Aline — Hortolândia-SP",
-      "Jardim Santa Clara do Lago — Hortolândia-SP",
-      "Jonatas Davi Visel dos Santos — Hortolândia-SP",
-      "José Claret Dionisio Professor — Hortolândia-SP",
-      "Liomar Freitas Câmara Professora — Hortolândia-SP",
-      "Manoel Ignacio da Silva — Hortolândia-SP",
-      "Maria Antonietta Garnero La Fortezza Professora — Hortolândia-SP",
-      "Maria Cristina de Souza Lobo Professora — Hortolândia-SP",
-      "Maria Rita Araujo Costa Professora — Hortolândia-SP",
-      "Maristela Carolina Mellin — Hortolândia-SP",
-      "Paulina Rosa Professora — Hortolândia-SP",
-      "Paulo Camilo de Camargo — Hortolândia-SP",
-      "Priscila Fernandes da Rocha — Hortolândia-SP",
-      "Raquel Saes Melhado da Silva Professora — Hortolândia-SP",
-      "Recreio Alvorada — Hortolândia-SP",
-      "Roberto Rodrigues de Azevedo Pastor — Hortolândia-SP",
-      "Yasuo Sasaki — Hortolândia-SP"
+      "Antonio Zanluchi Professor — Hortolândia-SP", "Cel Jto A EE Liomar Freitas Câmara Profa — Hortolândia-SP", "Centro de Progressão Penitenciária de Hortolândia — Hortolândia-SP", "Conceição Aparecida Terza Gomes Cardinales Professora — Hortolândia-SP", "Cristiane Chaves Moreira Braga Professora — Hortolândia-SP", "Eliseo Marson Professor — Hortolândia-SP", "ETEC de Hortolândia (Escola Técnica Estadual)", "Euzebio Antonio Rodrigues Professor — Hortolândia-SP", "Guido Rosolen — Hortolândia-SP", "Hedy Madalena Bocchi Professora — Hortolândia-SP", "Honorino Fabbri Doutor — Hortolândia-SP", "Jardim Aline — Hortolândia-SP", "Jardim Santa Clara do Lago — Hortolândia-SP", "Jonatas Davi Visel dos Santos — Hortolândia-SP", "José Claret Dionisio Professor — Hortolândia-SP", "Liomar Freitas Câmara Professora — Hortolândia-SP", "Manoel Ignacio da Silva — Hortolândia-SP", "Maria Antonietta Garnero La Fortezza Professora — Hortolândia-SP", "Maria Cristina de Souza Lobo Professora — Hortolândia-SP", "Maria Rita Araujo Costa Professora — Hortolândia-SP", "Maristela Carolina Mellin — Hortolândia-SP", "Paulina Rosa Professora — Hortolândia-SP", "Paulo Camilo de Camargo — Hortolândia-SP", "Priscila Fernandes da Rocha — Hortolândia-SP", "Raquel Saes Melhado da Silva Professora — Hortolândia-SP", "Recreio Alvorada — Hortolândia-SP", "Roberto Rodrigues de Azevedo Pastor — Hortolândia-SP", "Yasuo Sasaki — Hortolândia-SP"
     ].sort((a, b) => a.localeCompare(b, 'pt-BR'))
   },
   { label: 'OUTROS ÓRGÃOS (SGD)', options: ['OUTRO ÓRGÃO DO SISTEMA DE GARANTIA DE DIREITOS'] },
@@ -201,132 +115,13 @@ export const ORIGENS_CATEGORIZADAS = [
 ];
 
 export const EQUIPAMENTOS_REDE = [
-  'UBS ADELAIDE', 'UBS AMANDA I', 'UBS AMANDA II', 'UBS ROSOLÉM', 
-  'UBS SANTA CLARA', 'UBS NOVA HORTOLÂNDIA', 'UBS NOVO ÂNGULO', 
-  'UBS MINDA', 'UBS FIGUEIRAS', 'UBS ORESTES ONGARO', 
-  'CRAS AMANDA', 'CRAS ROSOLÉM', 'CRAS NOVO ÂNGULO', 'CRAS SANTA CLARA', 
-  'CREAS', 'ACOLHIMENTO MUNICIPAL', 'CAPS INFANTIL', 'CAPS AD'
+  'UBS ADELAIDE', 'UBS AMANDA I', 'UBS AMANDA II', 'UBS ROSOLÉM', 'UBS SANTA CLARA', 'UBS NOVA HORTOLÂNDIA', 'UBS NOVO ÂNGULO', 'UBS MINDA', 'UBS FIGUEIRAS', 'UBS ORESTES ONGARO', 'CRAS AMANDA', 'CRAS ROSOLÉM', 'CRAS NOVO ÂNGULO', 'CRAS SANTA CLARA', 'CREAS', 'ACOLHIMENTO MUNICIPAL', 'CAPS INFANTIL', 'CAPS AD'
 ].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 export const PASTAS_ART136_III_A = [
-  { 
-    area: 'SAÚDE', 
-    servicos: [
-      'UBS ADELAIDE', 'UBS AMANDA I', 'UBS AMANDA II', 'UBS FIGUEIRAS', 'UBS MINDA', 
-      'UBS NOVA HORTOLÂNDIA', 'UBS NOVO ÂNGULO', 'UBS ORESTES ONGARO', 'UBS ROSOLÉM', 
-      'UBS SANTA CLARA', 'CAPS AD', 'CAPS INFANTIL', 'UPA AMANDA', 'UPA ROSOLÉM', 
-      'HOSPITAL MÁRIO COVAS', 'AMBULATÓRIO DE ESPECIALIDADES'
-    ].sort() 
-  },
-  { 
-    area: 'EDUCAÇÃO', 
-    servicos: [
-      'SECRETARIA MUNICIPAL DE EDUCAÇÃO (SME)', 'CONSELHO ESCOLAR', 'EMEB ADELAIDE', 
-      'EMEB CLÁUDIO ROBERTO', 'EMEB DR. EDSON MOREIRA', 'EE ROSOLÉM', 'EE JARDIM AMANDA', 
-      'COLEGIO IASP', 'SUPERVISÃO DE ENSINO'
-    ].sort() 
-  },
-  {
-    area: 'EDUCAÇÃO - ESCOLA MUNICIPAL',
-    servicos: [
-      "Ana José Bodini Januário Dona – Escola Municipal de Ensino Fundamental",
-      "Armelinda Espurio da Silva – Escola Municipal de Ensino Fundamental",
-      "Bairro Taquara Branca – EMEIEF",
-      "Bairro Três Casas – Escola Municipal de Educação Infantil",
-      "Caio Fernando Gomes Pereira – Escola Municipal de Ensino Fundamental",
-      "Centro de Educação Básica do Município de Hortolândia",
-      "Centro Integrado de Educação e Reabilitação Municipal",
-      "Claudio Roberto Marques – Professor – Escola Municipal de Ensino Fundamental",
-      "EMEF Jardim Primavera",
-      "EMEF Salvador Zacharias P. Junior (municipal)",
-      "EMEI Carlos Vilela",
-      "EMEI Jardim Minda",
-      "EMEI Jardim Nossa Senhora Auxiliadora",
-      "EMEI Jardim Nosso Senhor da Auxiliadora",
-      "EMEI Jardim Nova Europa",
-      "EMEI Jardim Santa Amélia",
-      "EMEI Jardim Santa Clara do Lago I",
-      "EMEI Jardim Santa Clara do Lago II",
-      "EMEI Jardim Santa Emilia",
-      "EMEI Jardim Santa Esmeralda",
-      "EMEI Jardim Santiago",
-      "EMEI Jardim São Pedro",
-      "EMEI Nicolas Thiago dos Santos Lofrani",
-      "EMEI Residencial São Sebastião II",
-      "EMEI Tarsila do Amaral",
-      "EMEI Vila Real Sebastiana das Dores",
-      "EMEI Villagio Guiraldelli",
-      "EMEIEF Jardim Santa Amélia Humberto de Amorim Lopes",
-      "EMEIEF José Tenório da Silva",
-      "EMEIEF Luiza Vitória Oliveira Cruz",
-      "Emiliano Sanchez – Escola Municipal de Educação Infantil",
-      "Escola Municipal de Educação Básica Josias da Silva Macedo",
-      "Escola Municipal de Educação Básica Richard Chibim Naumann",
-      "Escola Municipal de Educação Infantil Angelita Inocente Nunes Bidutti",
-      "Escola Municipal de Educação Infantil Antonieta Claudine Oliveira Fusaro Catuzzo",
-      "Escola Municipal de Educação Infantil Jardim Interlagos",
-      "Escola Municipal de Educação Infantil Jardim Nossa Senhora de Fátima",
-      "Escola Municipal de Educação Infantil Jardim Novo Cambuí",
-      "Escola Municipal de Educação Infantil Miguel Camillo",
-      "Escola Municipal de Educação Infantil Olinda Maria de Jesus Souza",
-      "Escola Municipal de Educação Infantil Professora Izabel Sostena de Souza",
-      "Escola Municipal de Ensino Fundamental Dayla Cristina Souza de Amorim",
-      "Escola Municipal de Ensino Fundamental Jardim Amanda Caic",
-      "Escola Municipal de Ensino Fundamental Lourenço Daniel Zanardi",
-      "Escola Municipal de Ensino Fundamental Samuel da Silva Mendonça",
-      "Fernanda Grazielle Resende Covre – Escola Municipal de Ensino Fundamental",
-      "Helena Furtado Takahashi – Professora – Escola Municipal de Ensino Fundamental",
-      "Janilde Flores Gaby do Vale – Professora – Escola Municipal de Ensino Fundamental",
-      "Jardim Amanda I – Escola Municipal de Educação Infantil",
-      "Jardim Amanda II – Escola Municipal de Educação Infantil",
-      "Jardim Boa Esperança – EMEF José Roque (unidade municipal)",
-      "João Calixto da Silva – Escola Municipal de Ensino Fundamental",
-      "João Carlos do Amaral Soares – Escola Municipal de Educação Infantil e Fundamental",
-      "Maria Célia Cabral Amaral – Escola Municipal de Ensino Fundamental",
-      "Renato da Costa Lima – Escola Municipal de Ensino Fundamental"
-    ].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  },
-  {
-    area: 'EDUCAÇÃO - ESCOLA ESTADUAL',
-    servicos: [
-      "Antonio Zanluchi Professor — Hortolândia-SP",
-      "Cel Jto A EE Liomar Freitas Câmara Profa — Hortolândia-SP",
-      "Centro de Progressão Penitenciária de Hortolândia — Hortolândia-SP",
-      "Conceição Aparecida Terza Gomes Cardinales Professora — Hortolândia-SP",
-      "Cristiane Chaves Moreira Braga Professora — Hortolândia-SP",
-      "Eliseo Marson Professor — Hortolândia-SP",
-      "ETEC de Hortolândia (Escola Técnica Estadual)",
-      "Euzebio Antonio Rodrigues Professor — Hortolândia-SP",
-      "Guido Rosolen — Hortolândia-SP",
-      "Hedy Madalena Bocchi Professora — Hortolândia-SP",
-      "Honorino Fabbri Doutor — Hortolândia-SP",
-      "Jardim Aline — Hortolândia-SP",
-      "Jardim Santa Clara do Lago — Hortolândia-SP",
-      "Jonatas Davi Visel dos Santos — Hortolândia-SP",
-      "José Claret Dionisio Professor — Hortolândia-SP",
-      "Liomar Freitas Câmara Professora — Hortolândia-SP",
-      "Manoel Ignacio da Silva — Hortolândia-SP",
-      "Maria Antonietta Garnero La Fortezza Professora — Hortolândia-SP",
-      "Maria Cristina de Souza Lobo Professora — Hortolândia-SP",
-      "Maria Rita Araujo Costa Professora — Hortolândia-SP",
-      "Maristela Carolina Mellin — Hortolândia-SP",
-      "Paulina Rosa Professora — Hortolândia-SP",
-      "Paulo Camilo de Camargo — Hortolândia-SP",
-      "Priscila Fernandes da Rocha — Hortolândia-SP",
-      "Raquel Saes Melhado da Silva Professora — Hortolândia-SP",
-      "Recreio Alvorada — Hortolândia-SP",
-      "Roberto Rodrigues de Azevedo Pastor — Hortolândia-SP",
-      "Yasuo Sasaki — Hortolândia-SP"
-    ].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  },
-  { 
-    area: 'ASSISTÊNCIA SOCIAL', 
-    servicos: [
-      'CRAS AMANDA', 'CRAS NOVO ÂNGULO', 'CRAS ROSOLÉM', 'CRAS SANTA CLARA', 
-      'CRAS PRIMAVERA', 'CRAS VILA REAL', 'CREAS', 'NAD', 'DAS', 
-      'SERVIÇO DE ABORDAGEM SOCIAL', 'ACOLHIMENTO MUNICIPAL'
-    ].sort() 
-  },
+  { area: 'SAÚDE', servicos: ['UBS ADELAIDE', 'UBS AMANDA I', 'UBS AMANDA II', 'UBS FIGUEIRAS', 'UBS MINDA', 'UBS NOVA HORTOLÂNDIA', 'UBS NOVO ÂNGULO', 'UBS ORESTES ONGARO', 'UBS ROSOLÉM', 'UBS SANTA CLARA', 'CAPS AD', 'CAPS INFANTIL', 'UPA AMANDA', 'UPA ROSOLÉM', 'HOSPITAL MÁRIO COVAS', 'AMBULATÓRIO DE ESPECIALIDADES'].sort() },
+  { area: 'EDUCAÇÃO', servicos: ['SECRETARIA MUNICIPAL DE EDUCAÇÃO (SME)', 'CONSELHO ESCOLAR', 'EMEB ADELAIDE', 'EMEB CLÁUDIO ROBERTO', 'EMEB DR. EDSON MOREIRA', 'EE ROSOLÉM', 'EE JARDIM AMANDA', 'COLEGIO IASP', 'SUPERVISÃO DE ENSINO'].sort() },
+  { area: 'ASSISTÊNCIA SOCIAL', servicos: ['CRAS AMANDA', 'CRAS NOVO ÂNGULO', 'CRAS ROSOLÉM', 'CRAS SANTA CLARA', 'CRAS PRIMAVERA', 'CRAS VILA REAL', 'CREAS', 'NAD', 'DAS', 'SERVIÇO DE ABORDAGEM SOCIAL', 'ACOLHIMENTO MUNICIPAL'].sort() },
   { area: 'PREVIDÊNCIA', servicos: ['INSS HORTOLÂNDIA', 'PREV HORTOLÂNDIA'].sort() },
   { area: 'TRABALHO', servicos: ['PAT (POSTO DE ATENDIMENTO AO TRABALHADOR)', 'BANCO DO POVO', 'SECRETARIA DE DESENVOLVIMENTO ECONÔMICO'].sort() },
   { area: 'SEGURANÇA', servicos: ['GUARDA CIVIL MUNICIPAL (GCM)', 'POLÍCIA MILITAR (PM)', 'POLÍCIA CIVIL', 'CONSELHO COMUNITÁRIO DE SEGURANÇA (CONSEG)'].sort() }
@@ -337,22 +132,10 @@ export const TIPOS_DOCUMENTO = ['ATENDIMENTO PRESENCIAL', 'COMUNICAÇÃO INTERNA
 export const SUSPEITOS = ['PAI', 'MAE', 'PADRASTO', 'MADRASTA', 'TIOS', 'TERCEIROS', 'DESCONHECIDO'].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 export const AGENTES_VIOLADORES_ESTRUTURA: Record<string, { desc: string, options: string[] }> = {
-  "ESTADO": {
-    desc: "Quando a violação decorre de ação, omissão ou falha de órgãos, instituições ou agentes públicos.",
-    options: ["Instituição de Saúde", "Hospital", "Ambulatório", "Posto de Saúde", "Instituição de Ensino", "Escola", "Creche", "Cartório", "Defensoria Pública", "Entidade de Atendimento", "Entidade / Organização de Assistência", "Justiça da Infância e da Juventude", "Ministério Público", "Polícia Civil", "Polícia Militar", "Pessoa Física (no exercício de função pública)"].sort()
-  },
-  "FAMÍLIA": {
-    desc: "Quando a violação ocorre no âmbito familiar, por ação ou omissão de responsáveis legais ou parentes.",
-    options: ["Mãe", "Pai", "Padrasto", "Madrasta", "Avós", "Irmãos", "Tio / Tia", "Responsável (que seja membro da família)", "Parentes de segundo grau", "Parentes de 3º grau ou mais", "Outro (familiar não listado)"].sort()
-  },
-  "SOCIEDADE": {
-    desc: "Quando a violação é praticada por pessoas físicas não familiares, instituições privadas ou coletividades sociais.",
-    options: ["Empresa / Empregador / Estabelecimento Comercial", "Instituição Privada", "Entidade (com ou sem fins lucrativos)", "Meios de Comunicação", "Pessoa Física (não familiar)", "Clube / Associação", "Entidades Religiosas", "Organizações Não-Governamentais (ONGs)", "Vizinho", "Amigo", "Conhecido", "Desconhecido", "Profissional autônomo", "Outro"].sort()
-  },
-  "PRÓPRIA CONDUTA": {
-    desc: "Quando a violação decorre de comportamento do próprio adolescente, conforme avaliação técnica.",
-    options: ["Própria Conduta"]
-  }
+  "ESTADO": { desc: "Ação/omissão de agentes públicos.", options: ["Instituição de Saúde", "Hospital", "Instituição de Ensino", "Polícia Civil", "Polícia Militar"].sort() },
+  "FAMÍLIA": { desc: "Ocorre no âmbito familiar.", options: ["Mãe", "Pai", "Padrasto", "Madrasta", "Avós", "Tio / Tia"].sort() },
+  "SOCIEDADE": { desc: "Pessoas físicas ou instituições privadas.", options: ["Vizinho", "Amigo", "Conhecido", "Desconhecido"].sort() },
+  "PRÓPRIA CONDUTA": { desc: "Comportamento do próprio adolescente.", options: ["Própria Conduta"] }
 };
 
 export const TIPOS_VIOLENCIA: ViolenceType[] = ['FÍSICA', 'PSICOLÓGICA', 'SEXUAL', 'NEGLIGÊNCIA', 'OUTROS'];
@@ -362,87 +145,18 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
-  "Direito à Vida e à Saúde": {
-    "Não atendimento em saúde": ["Outros (especificar)", "Falta de leitos para internação hospitalar", "Recusa na realização do aborto legal", "Não atendimento especializado", "Não atendimento a gestante", "Não atendimento a usuário de droga lícita ou ilícita", "Falta de vacinação", "Não atendimento emergencial"].sort(),
-    "Atendimento inadequado em saúde": ["Falta de orientação aos pais/responsáveis quanto ao diagnóstico, estado de saúde, tratamento, conduta e acompanhamento prescrito", "Procedimento cirúrgico desnecessário (invasivo ou não)", "Falta de precedência no atendimento a criança e adolescente", "Extrações odontológicas desnecessárias", "Danos Decorrente de Procedimentos executados ou prescritos", "Negligência no atendimento pelos profissionais"].sort(),
-    "Práticas irregulares em restabelecimento da saúde": ["Inexistência ou não preenchimento de prontuário", "Exigência da presença dos pais para o atendimento em saúde", "Falta de alojamento conjunto no nascimento", "Falta de notificação em caso de suspeita ou confirmação de violência", "Proibição ou falta de condições de permanência do responsável em internações", "Não identificação do recém-nascido e sua mãe", "Retirada compulsória de bebê"].sort(),
-    "Ausência de ações específicas de saúde pública": ["Falta de ações específicas para prevenção ao uso abusivo de drogas lícitas ou ilícitas", "Falta de programas ou ações específicas para le tratamento do agressor e/ou abusador sexual", "Ausência de informações sobre doenças ou epidemias em curso", "Ausência de saneamento ambiental", "Ausência de saneamento básico"].sort(),
-    "Prejuízo à vida e saúde por ação/omissão": ["Falta de notificação de doença infecto-contagiosa", "Recusa de atendimento médico por razões filosóficas, ideológicas ou religiosas", "Omissão de socorro à criança/adolescente", "Condições precárias ou insalubres de instituições destinadas ao abrigamento ou aplicação de medidas socioeducativas"].sort(),
-    "Atos atentatórios à vida e à saúde": ["Ameaça de morte", "Uso de droga lícita ou ilícita (como forma de violência ou negligência)", "Tentativa de homicídio", "Tentativa de suicídio", "Automutilação/Lesão autoprovocada (em contexto de violação de direitos)", "Cirurgias com fins ilícitos para extração de órgãos"].sort()
-  },
-  "Educação, Culture, Esporte e Lazer": {
-    "Inexistência de ensino fundamental ou oferta inadequada": ["Falta de Escola de Nível Fundamental", "Falta de escola", "Falta de vaga no ensino fundamental", "Inexistência de ensino fundamental completo"].sort()
-  },
-  "Liberdade, Respeito e Dignidade": {
-    "Restrições ao direito de ir e vir": ["Apreensão ilegal", "Confinamento de qualquer espécie", "Detenção ilegal", "Exílio ou afastamento forçado", "Sequestro", "RecolHimento compulsório", "Impedimento de acesso a logradouro público, conjuntos habitacionais, etc."].sort(),
-    "Discriminação": ["Discriminação de criança/adolescente com histórico de ato infracional", "Isolamento ou tratamento desigual por raça/etnia", "Isolamento ou tratamento desigual por gênero", "Isolamento ou tratamento desigual por características pessoais", "Isolamento ou tratamento desigual por motivos políticos e/ou ideológicos", "Intolerância religiosa", "Isolamento ou tratamento desigual por orientação sexual ou identity de gênero", "Incitação da população contra criança/adolescente", "Discriminação de criança/adolescente em situação de acolhimento institucional", "Discriminação de adolescentes submetidos à medida socioeducativa"].sort(),
-    "Negação do direito à liberdade e à cidadania (Atos atentatórios à cidadania)": ["Cercamento de crença e culto religioso", "Violação da intimidade e da vida privada", "Exposição indevida da imagem da criança/adolescente", "Recusa de auxílio, refúgio ou orientação", "Cercamento ou desrespeito à liberdade de opinião, expressão e de manifestação do pensamento", "Omissão de autoridade no registro ou na apuração de queixa", "Local inadequado para abrigamento e internamento de criança ou adolescente", "Falta de denúncia de maus tratos", "Restrição de direito não prevista em lei ou por ordem judicial", "Não comunicação da apreensão pela autoridade policial", "Local inadequado para atendimento de medidas protetivas e socioeducativas", "Inexistência de Registro Civil de Nascimento", "Omissão de autoridade perante ameaça ou violação de direitos da criança e do adolescente", "Violência patrimonial"].sort(),
-    "Violência psicológica": ["Tortura psicológica", "Tratamento cruel ou degradante", "Humilhação pública", "Agressão verbal e ameaça", "Agressão à autoestima", "Cyberbullying"].sort(),
-    "Violência física": ["Supressão da alimentação com caráter punitivo", "Tortura física", "Punição corporal/castigo corporal", "Espancamento/Agressão física", "Castigo físico", "Maus Tratos", "Violência letal"].sort(),
-    "Violência sexual - abuso": ["Estupro", "Exibicionismo", "Abuso verbal/Telefonemas obscenos", "Assédio sexual", "Abuso sexual por members do círculo de relações sociais e de amizade com conjunção carnal ou não", "Aliciamento sexual", "Satisfação de lascívia", "Abuso sexual por detentores de custódia legal com conjunção carnal ou não"].sort(),
-    "Violência sexual - exploração sexual": ["Corrupção para a prostituição e/ou exploração sexual comercial", "Pornografia infantil", "Registro e armazenamento de cenas de sexo ou pornografia infantil", "Exploração sexual por members do círculo de relações sociais e de amizade", "Aliciamento para fins de exploração sexual", "Outros (especificar)"].sort()
-  }
+  "Direito à Vida e à Saúde": { "Atos atentatórios": ["Ameaça de morte", "Tentativa de homicídio"].sort() },
+  "Educação, Culture, Esporte e Lazer": { "Inexistência de ensino": ["Falta de vaga", "Falta de escola"].sort() }
 };
 
-/**
- * ECA Articles and common measures applied by the Council.
- */
 export const MEDIDAS_PROTECAO_ECA = [
-  {
-    artigo: 'Art. 101 - Medidas de Proteção',
-    incisos: [
-      'Art. 101, I', 'Art. 101, II', 'Art. 101, III', 'Art. 101, IV', 
-      'Art. 101, V', 'Art. 101, VI', 'Art. 101, VII', 'Art. 101, VIII', 'Art. 101, IX'
-    ]
-  },
-  {
-    artigo: 'Art. 129 - Medidas aos Pais/Responsável',
-    incisos: [
-      'Art. 129, I', 'Art. 129, II', 'Art. 129, III', 'Art. 129, IV',
-      'Art. 129, V', 'Art. 129, VI', 'Art. 129, VII', 'Art. 129, VIII', 'Art. 129, IX', 'Art. 129, X'
-    ]
-  },
-  {
-    artigo: 'Art. 136 - Atribuições do CT',
-    incisos: [
-      'Art. 136, I', 'Art. 136, II', 'Art. 136, III, a', 'Art. 136, III, b', 
-      'Art. 136, IV', 'Art. 136, V', 'Art. 136, VI', 'Art. 136, VII', 'Art. 136, VIII'
-    ]
-  }
+  { artigo: 'Art. 101 - Medidas de Proteção', incisos: ['Art. 101, I', 'Art. 101, II', 'Art. 101, III', 'Art. 101, IV', 'Art. 101, V'] },
+  { artigo: 'Art. 129 - Medidas aos Pais/Responsável', incisos: ['Art. 129, I', 'Art. 129, II', 'Art. 129, III', 'Art. 129, IV', 'Art. 129, V'] },
+  { artigo: 'Art. 136 - Atribuições do CT', incisos: ['Art. 136, I', 'Art. 136, II', 'Art. 136, III, a', 'Art. 136, III, b'] }
 ];
 
-/**
- * Descriptions for the measures based on the legal text of the ECA.
- */
 export const MEDIDAS_ECA_DESCRICAO: Record<string, string> = {
-  'Art. 101, I': 'Encaminhamento aos pais ou responsável, mediante termo de responsabilidade.',
-  'Art. 101, II': 'Orientação, apoio e acompanhamento temporários.',
-  'Art. 101, III': 'Matrícula e frequência obrigatórias em estabelecimento oficial de ensino fundamental.',
-  'Art. 101, IV': 'Inclusão em serviços e programas oficiais ou comunitários de proteção, apoio e promoção da família, da criança e do adolescente.',
-  'Art. 101, V': 'Requisição de tratamento médico, psicológico ou psiquiátrico, em regime hospitalar ou ambulatorial.',
-  'Art. 101, VI': 'Inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.',
-  'Art. 101, VII': 'Acolhimento institucional.',
-  'Art. 101, VIII': 'Inclusão em programa de acolhimento familiar.',
-  'Art. 101, IX': 'Colocação em família substituta.',
-  
-  'Art. 129, I': 'Encaminhamento a programa oficial ou comunitário de proteção à família.',
-  'Art. 129, II': 'Inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.',
-  'Art. 129, III': 'Encaminhamento a tratamento psicológico ou psiquiátrico.',
-  'Art. 129, IV': 'Encaminhamento a cursos ou programas de orientação.',
-  'Art. 129, V': 'Obrigação de matricular o filho ou enteado e acompanhar sua frequência e aproveitamento escolar.',
-  'Art. 129, VI': 'Obrigação de encaminhar a criança ou adolescente a tratamento especializado.',
-  'Art. 129, VII': 'Advertência.',
-  'Art. 129, VIII': 'Perda da guarda.',
-  'Art. 129, IX': 'Destituição da tutela.',
-  'Art. 129, X': 'Suspensão ou destituição do poder familiar.',
-
-  'Art. 136, I': 'Atender as crianças e adolescentes nas hipóteses previstas nos arts. 98 e 105, aplicando as medidas previstas no art. 101, I a VII.',
-  'Art. 136, II': 'Atender e aconselhar os pais ou responsável, aplicando as medidas previstas no art. 129, I a VII.',
-  'Art. 136, III, a': 'Requisitar serviços públicos nas áreas de saúde, educação, serviço social, previdência, trabalho e segurança.',
-  'Art. 136, III, b': 'Representar junto à autoridade judiciária nos casos de descumprimento injustificado de suas deliberações.',
-  'Art. 136, IV': 'Encaminhar ao Ministério Público notícia de fato que constitua infração administrativa ou penal contra os direitos da criança ou do adolescente.',
-  'Art. 136, V': 'Encaminhar à autoridade judiciária os casos de sua competência.',
-  'Art. 136, VI': 'Providenciar a medida estabelecida pela autoridade judiciária, dentre as previstas no art. 101, de I a VI, para o adolescente autor de ato infracional.',
-  'Art. 136, VII': 'Expedir notificações.',
-  'Art. 136, VIII': 'Requisitar certidões de nascimento e de óbito de criança ou adolescente quando necessário.'
+  'Art. 101, I': 'Encaminhamento aos pais ou responsável.', 'Art. 101, II': 'Orientação e apoio temporários.', 'Art. 101, III': 'Matrícula obrigatória.', 'Art. 101, IV': 'Inclusão em serviços oficiais.', 'Art. 101, V': 'Requisição de tratamento médico.',
+  'Art. 129, I': 'Encaminhamento a programa de proteção à família.', 'Art. 129, II': 'Tratamento a alcoólatras/toxicômanos.', 'Art. 129, III': 'Tratamento psicológico.', 'Art. 129, IV': 'Cursos de orientação.', 'Art. 129, V': 'Obrigação de matricular o filho.',
+  'Art. 136, I': 'Atender crianças e adolescentes.', 'Art. 136, II': 'Atender e aconselhar pais.', 'Art. 136, III, a': 'Requisitar serviços públicos.', 'Art. 136, III, b': 'Representar junto à autoridade judiciária.'
 };
