@@ -134,7 +134,6 @@ const App: React.FC = () => {
       handleNavigate('dashboard');
       return;
     }
-    // Lógica simplificada para distribuição omitida para brevidade, mas mantida no contexto real
     const id = `doc-${Math.random().toString(36).substr(2, 9)}`;
     const newDoc: Documento = { ...data, id, criado_em: new Date().toISOString(), status: ['NAO_LIDO'], criado_por_id: currentUser!.id, ciencia_registrada_por: [], distribuicao_automatica: !data.is_manual_override };
     setDocuments(prev => [newDoc, ...prev]);
@@ -147,11 +146,24 @@ const App: React.FC = () => {
   const activeAlert = useMemo(() => {
     if (!currentUser) return null;
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    return agenda.find(event => event.conselheiro_id === currentUser.id && event.data === todayStr && !acknowledgedEventIds.includes(event.id));
+    return agenda.find(event => {
+      const isMyEvent = currentUser.perfil === 'ADMIN' || event.conselheiro_id === currentUser.id;
+      if (!isMyEvent) return false;
+      if (acknowledgedEventIds.includes(event.id)) return false;
+      try {
+        const eventDate = new Date(`${event.data}T${event.hora}:00`);
+        const diffMs = eventDate.getTime() - now.getTime();
+        const diffHours = diffMs / (1000 * 60 * 60);
+        return diffHours > -0.5 && diffHours <= 2;
+      } catch (e) {
+        return false;
+      }
+    }) || null;
   }, [agenda, currentUser, acknowledgedEventIds]);
 
-  const handleDismissAlert = (id: string) => setAcknowledgedEventIds(prev => [...prev, id]);
+  const handleDismissAlert = useCallback((id: string) => {
+    setAcknowledgedEventIds(prev => [...prev, id]);
+  }, []);
 
   const renderContent = () => {
     if (!currentUser) return null;
@@ -159,6 +171,12 @@ const App: React.FC = () => {
     const isAdministrative = currentUser.perfil === 'ADMIN' || currentUser.perfil === 'ADMINISTRATIVO';
     
     if (activeTab === 'user-management' && isLud) return <UserManagementPanel users={users} onUpdateUser={(id, upd) => setUsers(prev => prev.map(u => u.id === id ? {...u, ...upd} : u))} onAddLog={(action) => addLog('SISTEMA', action)} />;
+    
+    if (activeTab === 'register' && isLud) {
+      setActiveTab('dashboard');
+      return null;
+    }
+
     if (activeTab === 'register') return <DocumentRegistration documents={documents} currentUser={currentUser} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} nextCouncilorId="" />;
     if (activeTab === 'edit' && editingDocId) return <DocumentRegistration documents={documents} currentUser={currentUser} initialData={documents.find(d => d.id === editingDocId)} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} nextCouncilorId="" />;
     
