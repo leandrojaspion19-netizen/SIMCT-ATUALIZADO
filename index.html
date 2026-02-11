@@ -24,12 +24,16 @@
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.38.0"
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
+    "vite": "https://esm.sh/vite@^7.3.1"
   }
 }
 </script>
 </head>
 <body class="bg-[#F9FAFB] text-[#1F2937]">
     <div id="root"></div>
+    <!-- Ponto de entrada crucial para o funcionamento no Vercel -->
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>
