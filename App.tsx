@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
+import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
 import { User, Documento, Log, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
 import { INITIAL_USERS, UserWithPassword, ANNUAL_ESCALA, getEffectiveEscala, checkIsPlantao } from './constants';
 import DocumentList from './components/DocumentList';
@@ -237,7 +237,7 @@ const App: React.FC = () => {
             return [...prev, eventId];
           });
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     setAcknowledgedEventIds(prev => {
       if (prev.includes(eventId)) return prev;
@@ -301,7 +301,7 @@ const App: React.FC = () => {
               const myReferenciaDocs = documents.filter(d => d.conselheiro_referencia_id === currentUser.id || d.conselheiro_providencia_id === currentUser.id);
               return <DocumentList documents={myReferenciaDocs} currentUser={currentUser} isReadOnly={isAdministrative} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
             case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={setSelectedDocId} onUpdateMonitoring={(id, m) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); addLog(id, "Prorrogação de prazo de acompanhamento registrada."); }} onRemoveMonitoring={(id) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: {...d.monitoramento!, concluido: true}} : d)); addLog(id, "Acompanhamento ativo removido do Monitoramento."); }} isReadOnly={isAdministrative} />;
-            case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={currentUser.perfil === 'ADMINISTRATIVO'} />;
+            case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={isLud || currentUser.perfil === 'ADMINISTRATIVO'} />;
             case 'search': return <AdvancedSearch documents={documents} currentUser={currentUser} onSelectDoc={setSelectedDocId} />;
             case 'logs': return <AuditLogViewer logs={logs} />;
             case 'settings': return <SettingsView currentUser={currentUser} onUpdatePassword={(p) => { setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, senha: p } : u)); addLog('SISTEMA', 'SEGURANÇA DIGITAL: Credenciais de acesso atualizadas pelo próprio titular.'); return true; }} />;
@@ -330,6 +330,13 @@ const App: React.FC = () => {
             const userInput = (selectedUserId || '').trim().toUpperCase();
             const user = users.find(u => (u.nome || '').toUpperCase() === userInput); 
             if (!user || user.senha !== password) { setLoginError("Erro: Credenciais inválidas."); return; } 
+            
+            // VERIFICAÇÃO DE BLOQUEIO DE ACESSO
+            if (user.status === 'BLOQUEADO') { 
+              setLoginError("ACESSO BLOQUEADO: PROCURE A ADM GERAL."); 
+              return; 
+            } 
+
             if (!acceptedTerms) { setLoginError("Obrigatório aceitar termos LGPD."); return; } 
             setCurrentUser(user); 
             addLog('SISTEMA', 'AUDITORIA DE ACESSO: Sessão iniciada com sucesso via autenticação digital.'); 
@@ -360,12 +367,12 @@ const App: React.FC = () => {
         <div className="p-6 flex items-center gap-4 border-b border-white/5"><img src={CT_LOGO_URL} alt="SIMCT" className="w-10 h-10" />{isSidebarOpen && <span className="text-white font-bold text-[18px] uppercase">SIM<span className="text-[#2563EB]">CT</span></span>}</div>
         <nav className="flex-1 px-4 mt-8 space-y-2">
           <NavItem icon={<LayoutDashboard className="w-5 h-5" />} label="Painel Geral" active={activeTab === 'dashboard'} onClick={() => handleNavigate('dashboard')} collapsed={!isSidebarOpen} />
-          {(currentUser.perfil === 'ADMIN' || currentUser.perfil === 'ADMINISTRATIVO') && <NavItem icon={<FilePlus className="w-5 h-5" />} label="NOVO PROCEDIMENTO" active={activeTab === 'register'} onClick={() => handleNavigate('register')} collapsed={!isSidebarOpen} />}
+          {(currentUser.perfil === 'ADMIN' || currentUser.perfil === 'ADMINISTRATIVO') && currentUser.nome !== 'LUDIMILA' && <NavItem icon={<FilePlus className="w-5 h-5" />} label="NOVO PROCEDIMENTO" active={activeTab === 'register'} onClick={() => handleNavigate('register')} collapsed={!isSidebarOpen} />}
           {currentUser.perfil === 'CONSELHEIRO' && (<><NavItem icon={<Briefcase className="w-5 h-5" />} label="Minha Referência" active={activeTab === 'my-docs'} onClick={() => handleNavigate('my-docs')} collapsed={!isSidebarOpen} /><NavItem icon={<Activity className="w-5 h-5" />} label="Monitoramento" active={activeTab === 'monitoring'} onClick={() => handleNavigate('monitoring')} collapsed={!isSidebarOpen} /></>)}
           <NavItem icon={<CalendarDays className="w-5 h-5" />} label="Agenda" active={activeTab === 'agenda'} onClick={() => handleNavigate('agenda')} collapsed={!isSidebarOpen} />
           <NavItem icon={<Database className="w-5 h-5" />} label="Busca Ativa" active={activeTab === 'search'} onClick={() => handleNavigate('search')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings')} collapsed={!isSidebarOpen} />
+          <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics'} collapsed={!isSidebarOpen} />
+          <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings'} collapsed={!isSidebarOpen} />
           {currentUser.nome === 'LUDIMILA' && <NavItem icon={<UserCog className="w-5 h-5" />} label="Gestão de RH" active={activeTab === 'user-management'} onClick={() => handleNavigate('user-management')} collapsed={!isSidebarOpen} />}
         </nav>
         <div className="p-4 border-t border-white/5"><button onClick={() => setCurrentUser(null)} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><LogOut className="w-5 h-5" />{isSidebarOpen && <span className="text-[13px] font-semibold uppercase">Logout</span>}</button></div>
