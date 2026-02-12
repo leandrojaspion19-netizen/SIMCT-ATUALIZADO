@@ -28,27 +28,6 @@ export const ANNUAL_ESCALA: Record<string, Record<number, string[]>> = {
   '2026-03': {
     1: ['SANDRA'], 2: ['LUIZA', 'MILENA', 'LEANDRO'], 3: ['MIRIAN', 'SANDRA', 'MILENA'], 4: ['LEANDRO', 'LUIZA', 'SANDRA'], 5: ['SANDRA', 'MIRIAN', 'LUIZA'], 6: ['MILENA', 'LEANDRO', 'MIRIAN'], 7: ['MILENA'], 8: ['MILENA'], 9: ['MIRIAN', 'LUIZA', 'SANDRA'], 10: ['LEANDRO', 'MILENA', 'LUIZA'], 11: ['SANDRA', 'MIRIAN', 'MILENA'], 12: ['MILENA', 'LEANDRO', 'MIRIAN'], 13: ['LUIZA', 'SANDRA', 'LEANDRO'], 14: ['LUIZA'], 15: ['LUIZA'], 16: ['LEANDRO', 'MIRIAN', 'MILENA'], 17: ['SANDRA', 'LUIZA', 'MIRIAN'], 18: ['MILENA', 'LEANDRO', 'LUIZA'], 19: ['LUIZA', 'SANDRA', 'LEANDRO'], 20: ['MIRIAN', 'MILENA', 'SANDRA'], 21: ['MIRIAN'], 22: ['MIRIAN'], 23: ['SANDRA', 'LEANDRO', 'LUIZA'], 24: ['MILENA', 'MIRIAN', 'LEANDRO'], 25: ['LUIZA', 'SANDRA', 'MIRIAN'], 26: ['MIRIAN', 'MILENA', 'SANDRA'], 27: ['LEANDRO', 'LUIZA', 'MILENA'], 28: ['LEANDRO'], 29: ['LEANDRO'], 30: ['MILENA', 'SANDRA', 'MIRIAN'], 31: ['LUIZA', 'LEANDRO', 'SANDRA']
   },
-  '2026-04': {
-    1: ['MIRIAN', 'MILENA', 'LEANDRO'], 2: ['LEANDRO', 'LUIZA', 'MILENA'], 3: ['SANDRA', 'MIRIAN', 'LUIZA'], 4: ['SANDRA'], 5: ['SANDRA'], 6: ['LUIZA', 'MILENA', 'LEANDRO'], 7: ['MIRIAN', 'SANDRA', 'MILENA'], 8: ['LEANDRO', 'LUIZA', 'SANDRA'], 9: ['SANDRA', 'MIRIAN', 'LUIZA'], 10: ['MILENA', 'LEANDRO', 'MIRIAN'], 11: ['MILENA'], 12: ['MILENA'], 13: ['MIRIAN', 'LUIZA', 'SANDRA'], 14: ['LEANDRO', 'MILENA', 'LUIZA'], 15: ['SANDRA', 'MIRIAN', 'MILENA'], 16: ['MILENA', 'LEANDRO', 'MIRIAN'], 17: ['LUIZA', 'SANDRA', 'LEANDRO'], 18: ['LUIZA'], 19: ['LUIZA'], 20: ['LEANDRO', 'MIRIAN', 'MILENA'], 21: ['SANDRA', 'LUIZA', 'MIRIAN'], 22: ['MILENA', 'LEANDRO', 'LUIZA'], 23: ['LUIZA', 'SANDRA', 'LEANDRO'], 24: ['MIRIAN', 'MILENA', 'SANDRA'], 25: ['MIRIAN'], 26: ['MIRIAN'], 27: ['SANDRA', 'LEANDRO', 'LUIZA'], 28: ['MILENA', 'MIRIAN', 'LEANDRO'], 29: ['LUIZA', 'SANDRA', 'MIRIAN'], 30: ['MIRIAN', 'MILENA', 'SANDRA']
-  },
-  '2026-05': {
-    1: ['LEANDRO', 'LUIZA', 'MILENA'], 2: ['LEANDRO'], 3: ['LEANDRO'], 4: ['MILENA', 'SANDRA', 'MIRIAN'], 5: ['LUIZA', 'LEANDRO', 'SANDRA'], 6: ['MIRIAN', 'MILENA', 'LEANDRO'], 7: ['LEANDRO', 'LUIZA', 'MILENA'], 8: ['SANDRA', 'MIRIAN', 'LUIZA'], 9: ['SANDRA'], 10: ['SANDRA'], 11: ['LUIZA', 'MILENA', 'LEANDRO'], 12: ['MIRIAN', 'SANDRA', 'MILENA'], 13: ['LEANDRO', 'LUIZA', 'SANDRA'], 14: ['SANDRA', 'MIRIAN', 'LUIZA'], 15: ['MILENA', 'LEANDRO', 'MIRIAN'], 16: ['MILENA'], 17: ['MILENA'], 18: ['MIRIAN', 'LUIZA', 'SANDRA'], 19: ['LEANDRO', 'MILENA', 'LUIZA'], 20: ['SANDRA', 'MIRIAN', 'MILENA'], 21: ['MILENA', 'LEANDRO', 'MIRIAN'], 22: ['LUIZA', 'SANDRA', 'LEANDRO'], 23: ['LUIZA'], 24: ['LUIZA'], 25: ['LEANDRO', 'MIRIAN', 'MILENA'], 26: ['SANDRA', 'LUIZA', 'MIRIAN'], 27: ['MILENA', 'LEANDRO', 'LUIZA'], 28: ['LUIZA', 'SANDRA', 'LEANDRO'], 29: ['MIRIAN', 'MILENA', 'SANDRA'], 30: ['MIRIAN']
-  },
-  '2026-06': {
-    1: ['SANDRA', 'LEANDRO', 'LUIZA'], 2: ['MILENA', 'MIRIAN', 'LEANDRO'], 3: ['LUIZA', 'SANDRA', 'MIRIAN'], 4: ['MIRIAN', 'MILENA', 'SANDRA'], 5: ['LEANDRO', 'LUIZA', 'MILENA'], 6: ['LEANDRO'], 7: ['LEANDRO'], 8: ['MILENA', 'SANDRA', 'MIRIAN'], 9: ['LUIZA', 'LEANDRO', 'SANDRA'], 10: ['MIRIAN', 'MILENA', 'LEANDRO'], 11: ['LEANDRO', 'LUIZA', 'MILENA'], 12: ['SANDRA', 'MIRIAN', 'LUIZA'], 13: ['SANDRA'], 14: ['SANDRA'], 15: ['LUIZA', 'MILENA', 'LEANDRO'], 16: ['MIRIAN', 'SANDRA', 'MILENA'], 17: ['LEANDRO', 'LUIZA', 'SANDRA'], 18: ['SANDRA', 'MIRIAN', 'LUIZA'], 19: ['MILENA', 'LEANDRO', 'MIRIAN'], 20: ['MILENA'], 21: ['MILENA'], 22: ['MIRIAN', 'LUIZA', 'SANDRA'], 23: ['LEANDRO', 'MILENA', 'LUIZA'], 24: ['SANDRA', 'MIRIAN', 'MILENA'], 25: ['MILENA', 'LEANDRO', 'MIRIAN'], 26: ['LUIZA', 'SANDRA', 'LEANDRO'], 27: ['LUIZA'], 28: ['LUIZA'], 29: ['LEANDRO', 'MIRIAN', 'MILENA'], 30: ['SANDRA', 'LUIZA', 'MIRIAN']
-  },
-  '2026-07': {
-    1: ['MILENA', 'LEANDRO', 'LUIZA'], 2: ['LUIZA', 'SANDRA', 'LEANDRO'], 3: ['MIRIAN', 'MILENA', 'SANDRA'], 4: ['MIRIAN'], 5: ['MIRIAN'], 6: ['SANDRA', 'LEANDRO', 'LUIZA'], 7: ['MILENA', 'MIRIAN', 'LEANDRO'], 8: ['LUIZA', 'SANDRA', 'MIRIAN'], 9: ['MIRIAN', 'MILENA', 'SANDRA'], 10: ['LEANDRO', 'LUIZA', 'MILENA'], 11: ['LEANDRO'], 12: ['LEANDRO'], 13: ['MILENA', 'SANDRA', 'MIRIAN'], 14: ['LUIZA', 'LEANDRO', 'SANDRA'], 15: ['MIRIAN', 'MILENA', 'LEANDRO'], 16: ['LEANDRO', 'LUIZA', 'MILENA'], 17: ['SANDRA', 'MIRIAN', 'LUIZA'], 18: ['SANDRA'], 19: ['SANDRA'], 20: ['LUIZA', 'MILENA', 'LEANDRO'], 21: ['MIRIAN', 'SANDRA', 'MILENA'], 22: ['LEANDRO', 'LUIZA', 'SANDRA'], 23: ['SANDRA', 'MIRIAN', 'LUIZA'], 24: ['MILENA', 'LEANDRO', 'MIRIAN'], 25: ['MILENA'], 26: ['MILENA'], 27: ['MIRIAN', 'LUIZA', 'SANDRA'], 28: ['LEANDRO', 'MILENA', 'LUIZA'], 29: ['SANDRA', 'MIRIAN', 'MILENA'], 30: ['MILENA', 'LEANDRO', 'MIRIAN'], 31: ['LUIZA', 'SANDRA', 'LEANDRO']
-  },
-  '2026-08': {
-    1: ['LUIZA'], 2: ['LUIZA'], 3: ['LEANDRO', 'MIRIAN', 'MILENA'], 4: ['SANDRA', 'LUIZA', 'MIRIAN'], 5: ['MILENA', 'LEANDRO', 'LUIZA'], 6: ['LUIZA', 'SANDRA', 'LEANDRO'], 7: ['MIRIAN', 'MILENA', 'SANDRA'], 8: ['MIRIAN'], 9: ['MIRIAN'], 10: ['SANDRA', 'LEANDRO', 'LUIZA'], 11: ['MILENA', 'MIRIAN', 'LEANDRO'], 12: ['LUIZA', 'SANDRA', 'MIRIAN'], 13: ['MIRIAN', 'MILENA', 'SANDRA'], 14: ['LEANDRO', 'LUIZA', 'MILENA'], 15: ['LEANDRO'], 16: ['LEANDRO'], 17: ['MILENA', 'SANDRA', 'MIRIAN'], 18: ['LUIZA', 'LEANDRO', 'SANDRA'], 19: ['MIRIAN', 'MILENA', 'LEANDRO'], 20: ['LEANDRO', 'LUIZA', 'MILENA'], 21: ['SANDRA', 'MIRIAN', 'LUIZA'], 22: ['SANDRA'], 23: ['SANDRA'], 24: ['LUIZA', 'MILENA', 'LEANDRO'], 25: ['MIRIAN', 'SANDRA', 'MILENA'], 26: ['LEANDRO', 'LUIZA', 'SANDRA'], 27: ['SANDRA', 'MIRIAN', 'LUIZA'], 28: ['MILENA', 'LEANDRO', 'MIRIAN'], 29: ['MILENA'], 30: ['MILENA'], 31: ['MIRIAN', 'LUIZA', 'SANDRA']
-  },
-  '2026-09': {
-    1: ['LEANDRO', 'MILENA', 'LUIZA'], 2: ['SANDRA', 'MIRIAN', 'MILENA'], 3: ['MILENA', 'LEANDRO', 'MIRIAN'], 4: ['LUIZA', 'SANDRA', 'LEANDRO'], 5: ['LUIZA'], 6: ['LUIZA'], 7: ['LEANDRO', 'MIRIAN', 'MILENA'], 8: ['SANDRA', 'LUIZA', 'MIRIAN'], 9: ['MILENA', 'LEANDRO', 'LUIZA'], 10: ['LUIZA', 'SANDRA', 'LEANDRO'], 11: ['MIRIAN', 'MILENA', 'SANDRA'], 12: ['MIRIAN'], 13: ['MIRIAN'], 14: ['SANDRA', 'LEANDRO', 'LUIZA'], 15: ['MILENA', 'MIRIAN', 'LEANDRO'], 16: ['LUIZA', 'SANDRA', 'MIRIAN'], 17: ['MIRIAN', 'MILENA', 'SANDRA'], 18: ['LEANDRO', 'LUIZA', 'MILENA'], 19: ['LEANDRO'], 20: ['LEANDRO'], 21: ['MILENA', 'SANDRA', 'MIRIAN'], 22: ['LUIZA', 'LEANDRO', 'SANDRA'], 23: ['MIRIAN', 'MILENA', 'LEANDRO'], 24: ['LEANDRO', 'LUIZA', 'MILENA'], 25: ['SANDRA', 'MIRIAN', 'LUIZA'], 26: ['SANDRA'], 27: ['SANDRA'], 28: ['LUIZA', 'MILENA', 'LEANDRO'], 29: ['MIRIAN', 'SANDRA', 'MILENA'], 30: ['LEANDRO', 'LUIZA', 'SANDRA']
-  },
-  '2026-10': {
-    1: ['SANDRA', 'MIRIAN', 'LUIZA'], 2: ['MILENA', 'LEANDRO', 'MIRIAN'], 3: ['MILENA'], 4: ['MILENA'], 5: ['MIRIAN', 'LUIZA', 'SANDRA'], 6: ['LEANDRO', 'MILENA', 'LUIZA'], 7: ['SANDRA', 'MIRIAN', 'MILENA'], 8: ['MILENA', 'LEANDRO', 'MIRIAN'], 9: ['LUIZA', 'SANDRA', 'LEANDRO'], 10: ['LUIZA'], 11: ['LUIZA'], 12: ['LEANDRO', 'MIRIAN', 'MILENA'], 13: ['SANDRA', 'LUIZA', 'MIRIAN'], 14: ['MILENA', 'LEANDRO', 'LUIZA'], 15: ['LUIZA', 'SANDRA', 'LEANDRO'], 16: ['MIRIAN', 'MILENA', 'SANDRA'], 17: ['MIRIAN'], 18: ['MIRIAN'], 19: ['SANDRA', 'LEANDRO', 'LUIZA'], 20: ['MILENA', 'MIRIAN', 'LEANDRO'], 21: ['LUIZA', 'SANDRA', 'MIRIAN'], 22: ['MIRIAN', 'MILENA', 'SANDRA'], 23: ['LEANDRO', 'LUIZA', 'MILENA'], 24: ['LEANDRO'], 25: ['LEANDRO'], 26: ['MILENA', 'SANDRA', 'MIRIAN'], 27: ['LUIZA', 'LEANDRO', 'SANDRA'], 28: ['MIRIAN', 'MILENA', 'LEANDRO'], 29: ['LEANDRO', 'LUIZA', 'MILENA'], 30: ['SANDRA', 'MIRIAN', 'LUIZA'], 31: ['SANDRA']
-  },
   '2026-11': {
     1: ['SANDRA'], 2: ['LUIZA', 'MILENA', 'LEANDRO'], 3: ['MIRIAN', 'SANDRA', 'MILENA'], 4: ['LEANDRO', 'LUIZA', 'SANDRA'], 5: ['SANDRA', 'MIRIAN', 'LUIZA'], 6: ['MILENA', 'LEANDRO', 'MIRIAN'], 7: ['MILENA'], 8: ['MILENA'], 9: ['MIRIAN', 'LUIZA', 'SANDRA'], 10: ['LEANDRO', 'MILENA', 'LUIZA'], 11: ['SANDRA', 'MIRIAN', 'MILENA'], 12: ['MILENA', 'LEANDRO', 'MIRIAN'], 13: ['LUIZA', 'SANDRA', 'LEANDRO'], 14: ['LUIZA'], 15: ['LUIZA'], 16: ['LEANDRO', 'MIRIAN', 'MILENA'], 17: ['SANDRA', 'LUIZA', 'MIRIAN'], 18: ['MILENA', 'LEANDRO', 'LUIZA'], 19: ['LUIZA', 'SANDRA', 'LEANDRO'], 20: ['MIRIAN', 'MILENA', 'SANDRA'], 21: ['MIRIAN'], 22: ['MIRIAN'], 23: ['SANDRA', 'LEANDRO', 'LUIZA'], 24: ['MILENA', 'MIRIAN', 'LEANDRO'], 25: ['LUIZA', 'SANDRA', 'MIRIAN'], 26: ['MIRIAN', 'MILENA', 'SANDRA'], 27: ['LEANDRO', 'LUIZA', 'MILENA'], 28: ['LEANDRO'], 29: ['LEANDRO'], 30: ['MILENA', 'SANDRA', 'MIRIAN']
   }
@@ -60,6 +39,172 @@ export const getEffectiveEscala = (dateStr: string): string[] => {
   const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
   const day = date.getDate();
   return ANNUAL_ESCALA[yearMonth]?.[day] || [];
+};
+
+export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
+  "Direito à Vida e à Saúde": {
+    "Não atendimento em saúde": [
+      "Outros (especificar)",
+      "Falta de leitos para internação hospitalar",
+      "Recusa na realização do aborto legal",
+      "Não atendimento especializado",
+      "Não atendimento a gestante",
+      "Não atendimento a usuário de droga lícita ou ilícita",
+      "Falta de vacinação",
+      "Não atendimento emergencial"
+    ].sort(),
+    "Atendimento inadequado em saúde": [
+      "Falta de orientação aos pais/responsáveis quanto ao diagnóstico, estado de saúde, tratamento, conduta e acompanhamento prescrito",
+      "Procedimento cirúrgico desnecessário (invasivo ou não)",
+      "Falta de precedência no atendimento a criança e adolescente",
+      "Extrações odontológicas desnecessárias",
+      "Danos Decorrente de Procedimentos executados ou prescritos",
+      "Negligência no atendimento pelos profissionais"
+    ].sort(),
+    "Práticas irregulares em restabelecimento da saúde": [
+      "Inexistência ou não preenchimento de prontuário",
+      "Exigência da presença dos pais para o atendimento em saúde",
+      "Falta de alojamento conjunto no nascimento",
+      "Falta de notificação em caso de suspeita ou confirmação de violência",
+      "Proibição ou falta de condições de permanência do responsável em internações",
+      "Não identificação do recém-nascido e sua mãe",
+      "Retirada compulsória de bebê"
+    ].sort(),
+    "Ausência de ações específicas de saúde pública": [
+      "Falta de ações específicas para prevenção ao uso abusivo de drogas lícitas ou ilícitas",
+      "Falta de programas ou ações específicas para o tratamento do agressor e/ou abusador sexual",
+      "Ausência de informações sobre doenças ou epidemias em curso",
+      "Ausência de saneamento ambiental",
+      "Ausência de saneamento básico"
+    ].sort(),
+    "Prejuízo à vida e saúde por ação/omissão": [
+      "Falta de notificação de doença infecto-contagiosa",
+      "Recusa de atendimento médico por razões filosóficas, ideológicas ou religiosas",
+      "Omissão de socorro à criança/adolescente",
+      "Condições precárias ou insalubres de instituições destinadas ao abrigamento ou aplicação de medidas socioeducativas"
+    ].sort(),
+    "Atos atentatórios à vida e à saúde": [
+      "Ameaça de morte",
+      "Uso de droga lícita ou ilícita (como forma de violência ou negligência)",
+      "Tentativa de homicídio",
+      "Tentativa de suicídio",
+      "Automutilação/Lesão autoprovocada (em contexto de violação de direitos)",
+      "Cirurgias com fins ilícitos para extração de órgãos"
+    ].sort()
+  },
+  "Convivência Familiar e Comunitária": {
+    "Privação ou dificuldade de convívio": [
+      "Omissão injustificada do exercício do dever familiar",
+      "Não recebimento de pensão alimentícia",
+      "Impedimento de contato com os pais ou outros familiares",
+      "Falta dos pais ou parentes",
+      "Subtração por familiares",
+      "Falta ou precariedade da moradia",
+      "Tráfico de crianças e adolescentes",
+      "Afastamento do convívio familiar por fuga",
+      "Abandono por familiares ou pelos responsáveis"
+    ].sort(),
+    "Inadequação do convívio familiar": [
+      "Falta de afeto, de zelo e de proteção",
+      "Dificuldades nas relações familiares durante o estágio de convívio para adoção",
+      "Ambiente familiar violento",
+      "Favorecimento ao uso de drogas lícitas ou ilícitas no ambiente familiar",
+      "Convívio em ambiente familiar que não garanta o desenvolvimento integral da criança ou adolescente",
+      "Alienação parental"
+    ].sort(),
+    "Violações à dignidade / negligence": [
+      "Falta de apoio emocional e psicológico",
+      "Omissão com a educação escolar e formação intelectual",
+      "Omissão no cuidado com a saúde, alimentação e higiene",
+      "Omissão de cuidados com a proteção e segurança"
+    ].sort(),
+    "Ausência de programas e ações (Falta de Suporte Estatal)": [
+      "Inexistência de serviço de orientação sócio-familiar",
+      "Falta de vaga em serviço de acolhimento institucional ou familiar",
+      "Inexistência de programa de transferência de renda",
+      "Inexistência de serviço de acolhimento para adultos acompanhados de crianças e/ou adolescentes",
+      "Inexistência de serviço de acolhimento para criança e adolescente sob medida protetiva de abrigo"
+    ].sort(),
+    "Atos atentatórios ao exercício da convivência": [
+      "Desconsideração ou desrespeito à opinião ou opção da criança ou adolescente nos casos de guarda, tutela ou adoção",
+      "Negação de filiação",
+      "Indefinição de paternidade",
+      "Impedimento de contato entre pais ou mães privados de liberdade",
+      "Impedimento de acesso à família, à comunidade e aos meios de comunicação"
+    ].sort()
+  },
+  "Educação, Cultura, Esporte e Lazer": {
+    "Ausência de educação infantil ou oferta inadequada": [
+      "Falta de vaga em pré-escola ou entidade equivalente",
+      "Falta de equipe especializada para atendimento de crianças de 0 a 3 anos",
+      "Falta de equipe especializada para atendimento de crianças de 3 a 6 anos",
+      "Falta de pré-escola",
+      "Distância física entre casa/creche ou empresa/creche",
+      "Falta de creche ou entidade equivalente"
+    ].sort(),
+    "Inexistência de ensino fundamental ou oferta inadequada": [
+      "Falta de oferta de educação intercultural bilíngue",
+      "Falta de vaga no ensino fundamental",
+      "Falta de oferta ou falta de vaga no ensino fundamental noturno regular ao adolescente",
+      "Falta de Escola de Nível Fundamental",
+      "Inexistência de ensino fundamental completo",
+      "Falta de escola",
+      "Falta de oferta ou falta de vaga no ensino noturno regular ao adolescente"
+    ].sort(),
+    "Inexistência de ensino médio ou oferta inadequada": [
+      "Falta de vaga no ensino médio",
+      "Inexistência de ensino médio completo",
+      "Falta de oferta ou falta de vaga no ensino médio noturno regular ao adolescente"
+    ].sort(),
+    "Impedimento de permanência na escola": [
+      "Constrangimento de qualquer espécie",
+      "Critérios avaliativos discriminatórios",
+      "Expulsão indevida",
+      "Punições abusivas",
+      "Transferência Compulsória",
+      "Evasão escolar (como consequência de violação de direitos)",
+      "Infrequência escolar (como consequência de violação de direitos)"
+    ].sort(),
+    "Falta de condições educacionais adequadas": [
+      "Ausência de merenda escolar",
+      "Excesso de faltas injustificadas (por parte da escola/professores)",
+      "Falta de informações aos pais sobre a frequência do aluno",
+      "Falta de material didático",
+      "Falta de segurança na escola",
+      "Interrupção sistemática do processo de ensino",
+      "Falta de atendimento especializado para crianças e adolescentes (com deficiência, altas habilidades, etc.)"
+    ].sort(),
+    "Inexistência ou impedimento de acesso à cultura, esporte e lazer": [
+      "Falta de manutenção nos equipamentos de cultura, esporte e lazer",
+      "Inexistência de equipamento para cultura e lazer",
+      "Falta de programas ou projetos públicos de cultura, esporte e de lazer",
+      "Inexistência de equipamento de esporte e lazer"
+    ].sort()
+  },
+  "Profissionalização e Proteção no Trabalho": {
+    "Condições irregulares de trabalho": [
+      "Trabalho ilegal do adolescente de 14 e 15 anos",
+      "Trabalho doméstico (em condições irregulares)",
+      "Trabalho em regime de escravidão",
+      "Trabalho infantil",
+      "Não observância dos direitos trabalhistas e previdenciários",
+      "Jornada de trabalho além do limite legal",
+      "Horário de trabalho noturno",
+      "Horário de trabalho incompatível com a formação escolar ou profissional"
+    ].sort(),
+    "Condições impróprias de remuneração e relação laboral": [
+      "Apropriação do resultado do trabalho por outra pessoa ou instituição",
+      "Coação física ou psicológica ao trabalho",
+      "Trabalho sem remuneração",
+      "Remuneração inadequada"
+    ].sort(),
+    "Inexistência ou insuficiência de capacitação profissional": [
+      "Ausência de encaminhamento a programa de capacitação profissional a adolescente sujeito a Medidas de Proteção Específicas (MPE)",
+      "Não acesso a capacitação ou formação técnica profissional",
+      "Impedimento de acesso a capacitação profissional para adolescente portadores de deficiência",
+      "Impedimento de acesso a programa de capacitação profissional para adolescente sujeito a Medidas de Proteção Específicas (MPE)"
+    ].sort()
+  }
 };
 
 export const FERIADOS_HORTOLANDIA = [
@@ -132,9 +277,30 @@ export const TIPOS_DOCUMENTO = ['ATENDIMENTO PRESENCIAL', 'COMUNICAÇÃO INTERNA
 export const SUSPEITOS = ['PAI', 'MAE', 'PADRASTO', 'MADRASTA', 'TIOS', 'TERCEIROS', 'DESCONHECIDO'].sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
 export const AGENTES_VIOLADORES_ESTRUTURA: Record<string, { desc: string, options: string[] }> = {
-  "ESTADO": { desc: "Ação/omissão de agentes públicos.", options: ["Instituição de Saúde", "Hospital", "Instituição de Ensino", "Polícia Civil", "Polícia Militar"].sort() },
-  "FAMÍLIA": { desc: "Ocorre no âmbito familiar.", options: ["Mãe", "Pai", "Padrasto", "Madrasta", "Avós", "Tio / Tia"].sort() },
-  "SOCIEDADE": { desc: "Pessoas físicas ou instituições privadas.", options: ["Vizinho", "Amigo", "Conhecido", "Desconhecido"].sort() },
+  "ESTADO": {
+    desc: "Ação/omissão de agentes públicos.",
+    options: [
+      "Ambulatório", "Cartório", "Creche", "Defensoria Pública", "Entidade de Atendimento",
+      "Entidade/Organização de Assistência", "Escola", "Hospital", "Instituição de ensino",
+      "Instituição de saúde", "Justiça da Infância e da Juventude", "Ministério Público",
+      "Pessoa Física (no exercício de função pública)", "Polícia Civil", "Polícia Militar", "Posto de Saúde"
+    ].sort()
+  },
+  "FAMÍLIA": {
+    desc: "Ocorre no âmbito familiar.",
+    options: [
+      "Avós", "Irmãos", "Madrasta", "Mãe", "Outro (familiar não listado)", "Padrasto", "Pai",
+      "Parentes de 2º grau", "Parentes de 3º grau ou mais", "Responsável (membro da família)", "Tio/Tia"
+    ].sort()
+  },
+  "SOCIEDADE": {
+    desc: "Pessoas físicas ou instituições privadas.",
+    options: [
+      "Clube / Associação", "Empresa / Empregador / Estabelecimento Comercial", "Entidade (sem fins lucrativos ou privada)",
+      "Entidades Religiosas", "Instituição (privada)", "Meios de Comunicação", "ONGs",
+      "Pessoal (Pessoa Física não-familiar)", "Outro"
+    ].sort()
+  },
   "PRÓPRIA CONDUTA": { desc: "Comportamento do próprio adolescente.", options: ["Própria Conduta"] }
 };
 
@@ -144,19 +310,56 @@ export const STATUS_LABELS: Record<string, string> = {
   AGUARDANDO_RESPOSTA: 'Aguardando Resposta', ARQUIVADO: 'Arquivado', NAO_LIDO: 'Documento não lido', NOTICIA_FATO_ENCAMINHADA: 'Notícia de Fato encaminhada', NOTIFICACAO: 'Notificação', NOTIFICACAO_REFERENCIA: 'Notificação/ Referência', OFICIO_RESPONDIDO: 'Ofício Respondido', RESPONDER_OFICIO: 'Responder Ofício', RESPOSTA_ENVIADA: 'Resposta enviada', SOLICITACAO_REDE: 'Solicitação de informação para rede', MONITORAMENTO: 'Monitoramento', SOLICITAR_REUNIAO_REDE: 'Solicitar reunião de rede', EMAIL_ENCAMINHADO: 'E-mail encaminhado', AGUARDANDO_VALIDACAO: 'Aguardando Validação', OFICIALIZADO: 'Oficializado'
 };
 
-export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
-  "Direito à Vida e à Saúde": { "Atos atentatórios": ["Ameaça de morte", "Tentativa de homicídio"].sort() },
-  "Educação, Culture, Esporte e Lazer": { "Inexistência de ensino": ["Falta de vaga", "Falta de escola"].sort() }
-};
-
 export const MEDIDAS_PROTECAO_ECA = [
-  { artigo: 'Art. 101 - Medidas de Proteção', incisos: ['Art. 101, I', 'Art. 101, II', 'Art. 101, III', 'Art. 101, IV', 'Art. 101, V'] },
-  { artigo: 'Art. 129 - Medidas aos Pais/Responsável', incisos: ['Art. 129, I', 'Art. 129, II', 'Art. 129, III', 'Art. 129, IV', 'Art. 129, V'] },
-  { artigo: 'Art. 136 - Atribuições do CT', incisos: ['Art. 136, I', 'Art. 136, II', 'Art. 136, III, a', 'Art. 136, III, b'] }
+  { artigo: 'Art. 101 - Medidas de Proteção', incisos: ['Art. 101, I', 'Art. 101, II', 'Art. 101, III', 'Art. 101, IV', 'Art. 101, V', 'Art. 101, VI', 'Art. 101, VII'] },
+  { artigo: 'Art. 129 - Medidas aos Pais/Responsável', incisos: ['Art. 129, I', 'Art. 129, II', 'Art. 129, III', 'Art. 129, IV', 'Art. 129, V', 'Art. 129, VI', 'Art. 129, VII'] },
+  { artigo: 'Art. 136 - Atribuições do CT', incisos: [
+    'Art. 136, I', 'Art. 136, II', 'Art. 136, III, a', 'Art. 136, III, b', 
+    'Art. 136, IV', 'Art. 136, V', 'Art. 136, VI', 'Art. 136, VII', 'Art. 136, VIII', 'Art. 136, IX', 'Art. 136, X', 
+    'Art. 136, XI', 'Art. 136, XII', 'Art. 136, XIII', 'Art. 136, XIV', 'Art. 136, XV', 'Art. 136, XVI', 'Art. 136, XVII', 
+    'Art. 136, XVIII', 'Art. 136, XIX', 'Art. 136, XX'
+  ] }
 ];
 
 export const MEDIDAS_ECA_DESCRICAO: Record<string, string> = {
-  'Art. 101, I': 'Encaminhamento aos pais ou responsável.', 'Art. 101, II': 'Orientação e apoio temporários.', 'Art. 101, III': 'Matrícula obrigatória.', 'Art. 101, IV': 'Inclusão em serviços oficiais.', 'Art. 101, V': 'Requisição de tratamento médico.',
-  'Art. 129, I': 'Encaminhamento a programa de proteção à família.', 'Art. 129, II': 'Tratamento a alcoólatras/toxicômanos.', 'Art. 129, III': 'Tratamento psicológico.', 'Art. 129, IV': 'Cursos de orientação.', 'Art. 129, V': 'Obrigação de matricular o filho.',
-  'Art. 136, I': 'Atender crianças e adolescentes.', 'Art. 136, II': 'Atender e aconselhar pais.', 'Art. 136, III, a': 'Requisitar serviços públicos.', 'Art. 136, III, b': 'Representar junto à autoridade judiciária.'
+  // Artigo 101
+  'Art. 101, I': 'Encaminhamento aos pais ou responsável, mediante termo de responsabilidade.',
+  'Art. 101, II': 'Orientação, apoio e acompanhamento temporários.',
+  'Art. 101, III': 'Matrícula e freqüência obrigatórias em estabelecimento oficial de ensino fundamental.',
+  'Art. 101, IV': 'Inclusão em serviços e programas oficiais ou comunitários de proteção, apoio e promoção da família, da criança e do adolescente.',
+  'Art. 101, V': 'Requisição de tratamento médico, psicológico ou psiquiátrico, em regime hospitalar ou ambulatorial, extensivo às famílias, especialmente em vitimização contra a dignidade sexual.',
+  'Art. 101, VI': 'Inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.',
+  'Art. 101, VII': 'Acolhimento institucional.',
+  
+  // Artigo 129
+  'Art. 129, I': 'Encaminhamento a serviços e programas oficiais ou comunitários de proteção, apoio e promoção da família.',
+  'Art. 129, II': 'Inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.',
+  'Art. 129, III': 'Encaminhamento a tratamento psicológico ou psiquiátrico.',
+  'Art. 129, IV': 'Encaminhamento a cursos ou programas de orientação.',
+  'Art. 129, V': 'Obrigação de matricular o filho ou pupilo e acompanhar sua freqüência e aproveitamento escolar.',
+  'Art. 129, VI': 'Obrigação de encaminhar a criança ou adolescente a tratamento especializado.',
+  'Art. 129, VII': 'Advertência.',
+  
+  // Artigo 136
+  'Art. 136, I': 'Atender crianças e adolescentes nas hipóteses dos arts. 98 e 105, aplicando medidas do art. 101, I a VII.',
+  'Art. 136, II': 'Atender e aconselhar pais ou responsável, aplicando medidas do art. 129, I a VII.',
+  'Art. 136, III, a': 'Requisitar serviços públicos nas áreas de saúde, educação, assistência social, previdência, trabalho e segurança.',
+  'Art. 136, III, b': 'Representar junto à autoridade judiciária nos casos de descumprimento injustificado de suas deliberações.',
+  'Art. 136, IV': 'Encaminhar ao Ministério Público notícia de fato que constitua infração administrativa ou penal contra os direitos da criança ou adolescente.',
+  'Art. 136, V': 'Encaminhar à autoridade judiciária os casos de sua competência.',
+  'Art. 136, VI': 'Providenciar a medida estabelecida pela autoridade judiciária, dentre as previstas no art. 101, de I a VI, para o adolescente autor de ato infracional.',
+  'Art. 136, VII': 'Expedir notificações.',
+  'Art. 136, VIII': 'Requisitar certidões de nascimento e de óbito de criança ou adolescente quando necessário.',
+  'Art. 136, IX': 'Assessorar o Poder Executivo local na elaboração da proposta orçamentária para planos e programas de atendimento dos direitos da criança e do adolescente.',
+  'Art. 136, X': 'Representar contra a violação dos direitos previstos no art. 220, § 3º, inciso II, da Constituição Federal.',
+  'Art. 136, XI': 'Representar ao MP para perda ou suspensão do poder familiar, após esgotadas as possibilidades de manutenção na família natural.',
+  'Art. 136, XII': 'Promover ações de divulgação e treinamento para reconhecimento de sintomas de maus-tratos.',
+  'Art. 136, XIII': 'Adotar ações articuladas para identificação da agressão e agilidade no atendimento à vítima de violência doméstica e familiar.',
+  'Art. 136, XIV': 'Atender à criança e ao adolescente vítima ou testemunha de violência doméstica e familiar, provendo orientação e aconselhamento.',
+  'Art. 136, XV': 'Representar à autoridade judicial ou policial para requerer o afastamento do agressor do lar nos casos de violência doméstica.',
+  'Art. 136, XVI': 'Representar à autoridade judicial para requerer a concessão de medida protetiva de urgência.',
+  'Art. 136, XVII': 'Representar ao Ministério Público para requerer ação cautelar de antecipação de produção de prova.',
+  'Art. 136, XVIII': 'Tomar providências cabíveis ao receber comunicação de ação ou omissão que constitua violência doméstica e familiar.',
+  'Art. 136, XIX': 'Receber e encaminhar informações de noticiantes relativas à prática de violência ou tratamento cruel.',
+  'Art. 136, XX': 'Representar por medidas cautelares relacionadas à eficácia da proteção de noticiante ou denunciante de crimes de violência doméstica.'
 };

@@ -58,11 +58,8 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
 
   // Lógica de Trava de Referência: ADM altera se for Novo registro e optar por manual; Conselheiro só altera se for o titular.
   const isReferenceLocked = useMemo(() => {
-    // Se for ADM e optar por manual no registro de caso antigo, desbloqueia.
     if (isAdmin && !isEditing && formData.is_manual_override) return false;
-    // Caso contrário, se for ADM, permanece bloqueado para seguir a regra de proteção.
     if (isAdmin) return true;
-    // Para conselheiros, só desbloqueia se ele for a própria referência do caso em edição.
     if (isEditing && initialData?.conselheiro_referencia_id !== currentUser.id) return true;
     return false;
   }, [currentUser, isEditing, initialData, formData.is_manual_override, isAdmin]);
@@ -85,7 +82,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
       if (history.length > 0) {
         const latestDoc = history[history.length - 1];
         if (!formData.genitora_nome && latestDoc.genitora_nome) {
-          setFormData(prev => ({ ...prev, genitora_nome: latestDoc.genitora_nome, bairro: prev.bairro || latestDoc.bairro }));
+          setFormData(prev => ({ ...prev, genitora_nome: latestDoc.genitora_nome, bairro: prev.bairro || latestDoc.bairro, cpf_genitora: prev.cpf_genitora || latestDoc.cpf_genitora || '' }));
         }
         const childrenMap = new Map<string, ChildData>();
         history.forEach(doc => {
@@ -111,7 +108,6 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
       const escala = getEffectiveEscala(formData.data_recebimento);
       let autoProvId = '';
       if (escala && escala.length > 0) {
-        // Sequência baseada apenas em documentos distribuídos automaticamente (não altera a sequência)
         const autoDocsNoMesmoDia = documents.filter(d => 
           d.data_recebimento === formData.data_recebimento && 
           d.distribuicao_automatica &&
@@ -322,9 +318,16 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
                 </div>
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Mãe / Responsável Legal *</label>
-              <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] uppercase outline-none transition-all ${getErrorClass(formData.genitora_nome)}`} value={formData.genitora_nome} onChange={e => handleInputChange('genitora_nome', e.target.value.toUpperCase())} placeholder="NOME COMPLETO DA GENITORA" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Mãe / Responsável Legal *</label>
+                <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] uppercase outline-none transition-all ${getErrorClass(formData.genitora_nome)}`} value={formData.genitora_nome} onChange={e => handleInputChange('genitora_nome', e.target.value.toUpperCase())} placeholder="NOME COMPLETO DA GENITORA" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">CPF da Genitora</label>
+                <input type="text" className="w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] outline-none transition-all" value={formData.cpf_genitora} onChange={e => handleInputChange('cpf_genitora', e.target.value.replace(/\D/g, ''))} placeholder="000.000.000-00" maxLength={11} />
+              </div>
             </div>
           </div>
 
@@ -341,19 +344,26 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
                     <label className="text-[11px] font-bold text-[#4B5563] uppercase">Nome Completo *</label>
                     <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[13px] uppercase outline-none ${getErrorClass(crianca.nome)}`} value={crianca.nome} onChange={e => handleChildChange(idx, 'nome', e.target.value.toUpperCase())} />
                   </div>
-                  {idx === 0 && (
-                    <div className="space-y-1 animate-in slide-in-from-top-2">
-                      <label className="text-[11px] font-bold text-[#4B5563] uppercase">Endereço da Criança/Adolescente *</label>
-                      <select 
-                        className={`w-full p-3 bg-white border rounded-xl text-[13px] uppercase outline-none transition-all ${getErrorClass(formData.bairro)}`} 
-                        value={formData.bairro} 
-                        onChange={e => handleInputChange('bairro', e.target.value)}
-                      >
-                        <option value="">Selecione...</option>
-                        {BAIRROS.map(b => <option key={b} value={b}>{b}</option>)}
-                      </select>
+                  
+                  <div className={idx === 0 ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "space-y-1"}>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-[#4B5563] uppercase">CPF da Criança</label>
+                      <input type="text" className="w-full p-3 bg-[#F9FAFB] border rounded-xl text-[13px] outline-none" value={crianca.cpf || ''} onChange={e => handleChildChange(idx, 'cpf', e.target.value.replace(/\D/g, ''))} placeholder="000.000.000-00" maxLength={11} />
                     </div>
-                  )}
+                    {idx === 0 && (
+                      <div className="space-y-1 animate-in slide-in-from-top-2">
+                        <label className="text-[11px] font-bold text-[#4B5563] uppercase">Endereço (Bairro) *</label>
+                        <select 
+                          className={`w-full p-3 bg-white border rounded-xl text-[13px] uppercase outline-none transition-all ${getErrorClass(formData.bairro)}`} 
+                          value={formData.bairro} 
+                          onChange={e => handleInputChange('bairro', e.target.value)}
+                        >
+                          <option value="">Selecione...</option>
+                          {BAIRROS.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] font-bold text-[#4B5563] uppercase">Nascimento *</label>

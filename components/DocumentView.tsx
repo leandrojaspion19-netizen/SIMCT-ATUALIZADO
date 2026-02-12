@@ -37,6 +37,8 @@ const DocumentView: React.FC<DocumentViewProps> = ({
   const [localStatus, setLocalStatus] = useState<DocumentStatus[]>(doc.status || []);
   const [showSipiaModal, setShowSipiaModal] = useState(false);
   const [sipiaSel, setSipiaSel] = useState({ fundamental: '', grupo: '', especifico: '' });
+  const [sipiaSearchTerm, setSipiaSearchTerm] = useState('');
+  
   const [showAgenteModal, setShowAgenteModal] = useState(false);
   const [agenteSel, setAgenteSel] = useState({ categoria: '', opcao: '', tipo: 'PRINCIPAL' as 'PRINCIPAL' | 'SECUNDARIO' });
   const [showMedidaModal, setShowMedidaModal] = useState(false);
@@ -74,6 +76,29 @@ const DocumentView: React.FC<DocumentViewProps> = ({
        return matchCpf || matchNome;
     });
   }, [allDocuments, doc]);
+
+  // Lógica para busca inteligente no SIPIA
+  const sipiaFlattenedOptions = useMemo(() => {
+    const options: { fundamental: string, grupo: string, especifico: string }[] = [];
+    Object.entries(SIPIA_HIERARCHY).forEach(([fundamental, grupos]) => {
+      Object.entries(grupos).forEach(([grupo, especificos]) => {
+        especificos.forEach(especifico => {
+          options.push({ fundamental, grupo, especifico });
+        });
+      });
+    });
+    return options;
+  }, []);
+
+  const sipiaSearchResults = useMemo(() => {
+    if (!sipiaSearchTerm.trim()) return [];
+    const term = sipiaSearchTerm.toUpperCase();
+    return sipiaFlattenedOptions.filter(opt => 
+      opt.fundamental.toUpperCase().includes(term) ||
+      opt.grupo.toUpperCase().includes(term) ||
+      opt.especifico.toUpperCase().includes(term)
+    ).slice(0, 10);
+  }, [sipiaSearchTerm, sipiaFlattenedOptions]);
 
   const hasChanges = useMemo(() => {
     return JSON.stringify(tempViolacoes) !== JSON.stringify(doc.violacoesSipia) ||
@@ -211,6 +236,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
     if (!sipiaSel.especifico) return;
     setTempViolacoes(prev => [...prev, { ...sipiaSel }]);
     setSipiaSel({ fundamental: '', grupo: '', especifico: '' });
+    setSipiaSearchTerm('');
     setShowSipiaModal(false);
   };
 
@@ -533,15 +559,54 @@ const DocumentView: React.FC<DocumentViewProps> = ({
         />
       )}
 
-      {/* MODAL SIPIA */}
+      {/* MODAL SIPIA COM BUSCA INTELIGENTE */}
       {showSipiaModal && isDirectActionMode && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 backdrop-blur-md bg-slate-900/40 animate-in fade-in duration-300">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 border border-[#E5E7EB] animate-in zoom-in-95 space-y-6">
             <header className="flex justify-between items-center border-b pb-4">
-              <h3 className="text-[16px] font-bold text-[#111827] uppercase">Tipificar Violação SIPIA</h3>
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <h3 className="text-[16px] font-bold text-[#111827] uppercase">Tipificar Violação SIPIA</h3>
+              </div>
               <button onClick={() => setShowSipiaModal(false)}><X className="w-6 h-6 text-slate-400" /></button>
             </header>
-            <div className="space-y-4">
+
+            {/* Campo de Busca Inteligente */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-black text-blue-600 uppercase tracking-widest ml-1">Busca Rápida de Violações</label>
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="DIGITE PALAVRAS-CHAVE (EX: MEDICO, ESCOLA, AGRESSOR)..."
+                  className="w-full p-4 pl-12 bg-blue-50/50 border border-blue-100 rounded-xl outline-none text-[13px] font-bold uppercase focus:border-[#2563EB] transition-all"
+                  value={sipiaSearchTerm}
+                  onChange={e => setSipiaSearchTerm(e.target.value)}
+                />
+              </div>
+
+              {sipiaSearchTerm.trim() && (
+                <div className="mt-2 bg-white border border-blue-100 rounded-xl shadow-xl max-h-[250px] overflow-y-auto animate-in slide-in-from-top-2">
+                   {sipiaSearchResults.length > 0 ? sipiaSearchResults.map((res, idx) => (
+                     <button 
+                       key={idx}
+                       onClick={() => {
+                          setSipiaSel({ fundamental: res.fundamental, grupo: res.grupo, especifico: res.especifico });
+                          setSipiaSearchTerm('');
+                       }}
+                       className="w-full text-left p-4 hover:bg-blue-50 transition-colors border-b border-slate-50 last:border-0"
+                     >
+                        <div className="text-[9px] font-black text-blue-600 uppercase tracking-widest">{res.fundamental} | {res.grupo}</div>
+                        <div className="text-[12px] font-bold text-slate-800 uppercase mt-1">{res.especifico}</div>
+                     </button>
+                   )) : (
+                     <div className="p-8 text-center text-slate-400 text-[11px] font-bold uppercase italic">Nenhuma violação compatível encontrada.</div>
+                   )}
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 pt-2">
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-[#4B5563] uppercase">Direito Fundamental</label>
                 <select className="w-full p-3 bg-slate-50 border rounded-xl outline-none text-[13px] font-bold uppercase" value={sipiaSel.fundamental} onChange={e => setSipiaSel({...sipiaSel, fundamental: e.target.value, grupo: '', especifico: ''})}>
@@ -550,7 +615,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
                 </select>
               </div>
               {sipiaSel.fundamental && (
-                <div className="space-y-1">
+                <div className="space-y-1 animate-in slide-in-from-top-1">
                   <label className="text-[11px] font-bold text-[#4B5563] uppercase">Grupo de Violação</label>
                   <select className="w-full p-3 bg-slate-50 border rounded-xl outline-none text-[13px] font-bold uppercase" value={sipiaSel.grupo} onChange={e => setSipiaSel({...sipiaSel, grupo: e.target.value, especifico: ''})}>
                     <option value="">Selecione...</option>
@@ -559,7 +624,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
                 </div>
               )}
               {sipiaSel.grupo && (
-                <div className="space-y-1">
+                <div className="space-y-1 animate-in slide-in-from-top-1">
                   <label className="text-[11px] font-bold text-[#4B5563] uppercase">Violação Específica</label>
                   <select className="w-full p-3 bg-slate-50 border rounded-xl outline-none text-[13px] font-bold uppercase" value={sipiaSel.especifico} onChange={e => setSipiaSel({...sipiaSel, especifico: e.target.value})}>
                     <option value="">Selecione...</option>
