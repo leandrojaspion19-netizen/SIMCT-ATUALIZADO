@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Save, Plus, Trash2, ShieldCheck, AlertCircle, Zap, UserCheck, Calendar, Fingerprint, ChevronDown, Lock, Clock, Upload, FileText, Scale, Gavel, LayoutList, Users, Baby, ShieldAlert, Search, Check, Info, Users2, History, Sparkles, Loader2, UserRound, ArrowRightCircle, ShieldEllipsis, AlertTriangle, Database, UserPlus, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Documento, User, ChildData, SuspectType, ViolenceType, SipiaViolation, AgenteVioladorEntry, MedidaAplicada } from '../types';

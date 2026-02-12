@@ -1,4 +1,3 @@
-
 import { User, Documento, Log, ViolenceType } from './types';
 
 export interface UserWithPassword extends User {
@@ -151,7 +150,7 @@ export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
       "Falta de escola",
       "Falta de oferta ou falta de vaga no ensino noturno regular ao adolescente"
     ].sort(),
-    "Inexistência de ensino médio ou oferta inadequada": [
+    "Inexistência de ensino médio or oferta inadequada": [
       "Falta de vaga no ensino médio",
       "Inexistência de ensino médio completo",
       "Falta de oferta ou falta de vaga no ensino médio noturno regular ao adolescente"
