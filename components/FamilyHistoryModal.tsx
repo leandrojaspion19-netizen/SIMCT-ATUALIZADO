@@ -86,7 +86,6 @@ const FamilyHistoryModal: React.FC<FamilyHistoryModalProps> = ({ history, curren
                             {new Date(doc.data_recebimento).toLocaleDateString('pt-BR')}
                           </span>
                           <span className="text-[11px] font-mono font-bold text-slate-300">#{doc.id}</span>
-                          <span className="px-3 py-1 bg-blue-50 text-[#2563EB] text-[10px] font-black rounded-lg uppercase">{doc.tipo_documento}</span>
                         </div>
                         <h5 className="text-[15px] font-bold text-[#111827] uppercase">{doc.crianca_nome}</h5>
                         

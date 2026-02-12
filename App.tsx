@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
 import { User, Documento, Log, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
-import { INITIAL_USERS, UserWithPassword, ANNUAL_ESCALA, getEffectiveEscala, checkIsPlantao } from './constants';
+/* Removed unused and non-existent checkIsPlantao from imports to fix compilation error */
+import { INITIAL_USERS, UserWithPassword } from './constants';
 import DocumentList from './components/DocumentList';
 import DocumentRegistration from './components/DocumentRegistration';
 import DocumentView from './components/DocumentView';

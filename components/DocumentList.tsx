@@ -113,6 +113,33 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, currentUser, onS
                            <div className="flex items-center gap-2 text-[12px] text-[#4B5563] font-medium uppercase"><UserRound className="w-3.5 h-3.5 text-[#9CA3AF]" /> MÃE: <span className="font-bold text-[#1F2937]">{doc.genitora_nome}</span></div>
                            <div className="flex items-center gap-2 text-[12px] text-[#4B5563] font-medium uppercase"><Clock className="w-3.5 h-3.5 text-[#9CA3AF]" /> {new Date(doc.data_recebimento).toLocaleDateString('pt-BR')}</div>
                         </div>
+
+                        {/* BLOCO CONTEXTUAL PARA ASSINATURA PENDENTE */}
+                        {isSignaturePending && (
+                          <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center gap-2 text-[10px] font-black text-amber-700 uppercase tracking-widest">
+                              <AlertCircle className="w-3.5 h-3.5" /> Requer sua assinatura técnica
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap gap-1.5">
+                                <span className="text-[9px] font-black text-slate-400 uppercase mr-1">Violações:</span>
+                                {doc.violacoesSipia.map((v, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 bg-white border border-blue-100 text-blue-700 text-[9px] font-bold rounded uppercase">
+                                    {v.especifico}
+                                  </span>
+                                ))}
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                <span className="text-[9px] font-black text-slate-400 uppercase mr-1">Agentes:</span>
+                                {doc.agentesVioladores.map((a, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 bg-white border border-amber-100 text-amber-700 text-[9px] font-bold rounded uppercase">
+                                    {a.principal}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                      </div>
 
                      <div className="flex flex-wrap items-center gap-4 pt-2">

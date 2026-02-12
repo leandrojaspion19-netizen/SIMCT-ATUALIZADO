@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Save, Plus, Trash2, ShieldCheck, AlertCircle, Zap, UserCheck, Calendar, Fingerprint, ChevronDown, Lock, Clock, Upload, FileText, Scale, Gavel, LayoutList, Users, Baby, ShieldAlert, Search, Check, Info, Users2, History, Sparkles, Loader2, UserRound, ArrowRightCircle, ShieldEllipsis, AlertTriangle, Database, UserPlus, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Documento, User, ChildData, SuspectType, ViolenceType, SipiaViolation, AgenteVioladorEntry, MedidaAplicada } from '../types';
-import { ORIGENS_CATEGORIZADAS, BAIRROS, TIPOS_DOCUMENTO, SUSPEITOS, TIPOS_VIOLENCIA, INITIAL_USERS, ANNUAL_ESCALA, GENDER_LABELS, SIPIA_HIERARCHY, MEDIDAS_PROTECAO_ECA, MEDIDAS_ECA_DESCRICAO, AGENTES_VIOLADORES_ESTRUTURA, getEffectiveEscala } from '../constants';
+import { ORIGENS_CATEGORIZADAS, BAIRROS, SUSPEITOS, TIPOS_VIOLENCIA, INITIAL_USERS, ANNUAL_ESCALA, GENDER_LABELS, SIPIA_HIERARCHY, MEDIDAS_PROTECAO_ECA, MEDIDAS_ECA_DESCRICAO, AGENTES_VIOLADORES_ESTRUTURA, getEffectiveEscala, CANAIS_COMUNICACAO } from '../constants';
 import FamilyHistoryModal from './FamilyHistoryModal';
 
 interface DocumentRegistrationProps {
@@ -22,7 +23,6 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
-  const [duplicateAlert, setDuplicateAlert] = useState<{ type: 'CPF_MAE' | 'CPF_CRIANCA' | 'NOME_MAE', docId: string } | null>(null);
   
   const [historicalChildren, setHistoricalChildren] = useState<ChildData[]>([]);
   const [familyHistory, setFamilyHistory] = useState<Documento[]>([]);
@@ -30,7 +30,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
 
   const [formData, setFormData] = useState({
     origem: initialData?.origem || '',
-    tipo_documento: initialData?.tipo_documento || '',
+    canal_comunicado: initialData?.canal_comunicado || '',
     data_recebimento: initialData?.data_recebimento || new Date().toISOString().split('T')[0],
     hora_rece_bimento: initialData?.hora_rece_bimento || new Date().toTimeString().substring(0, 5),
     cpf_genitora: initialData?.cpf_genitora || '',
@@ -55,7 +55,6 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
   const isEditing = !!initialData;
   const isAdmin = currentUser.perfil === 'ADMIN' || currentUser.perfil === 'ADMINISTRATIVO';
 
-  // Lógica de Trava de Referência: ADM altera se for Novo registro e optar por manual; Conselheiro só altera se for o titular.
   const isReferenceLocked = useMemo(() => {
     if (isAdmin && !isEditing && formData.is_manual_override) return false;
     if (isAdmin) return true;
@@ -68,21 +67,31 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
     return attemptedSubmit && isEmpty ? 'border-red-500 bg-red-50' : 'border-[#E5E7EB]';
   };
 
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate || birthDate.length < 10) return null;
+    const today = new Date();
+    const birth = new Date(birthDate + 'T12:00:00');
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
+
   useEffect(() => {
     const cleanCpf = formData.cpf_genitora.replace(/\D/g, '');
-    const cleanNome = formData.genitora_nome.trim().toUpperCase();
-    if ((cleanCpf.length === 11 || cleanNome.length > 5) && !isEditing) {
-      const history = documents.filter(d => {
-         const matchCpf = cleanCpf.length === 11 && d.cpf_genitora?.replace(/\D/g, '') === cleanCpf;
-         const matchNome = cleanNome.length > 5 && d.genitora_nome?.toUpperCase() === cleanNome;
-         return matchCpf || matchNome;
-      });
-      setFamilyHistory(history);
+    if (cleanCpf.length === 11 && !isEditing) {
+      const history = documents.filter(d => d.cpf_genitora?.replace(/\D/g, '') === cleanCpf);
       if (history.length > 0) {
-        const latestDoc = history[history.length - 1];
-        if (!formData.genitora_nome && latestDoc.genitora_nome) {
-          setFormData(prev => ({ ...prev, genitora_nome: latestDoc.genitora_nome, bairro: prev.bairro || latestDoc.bairro, cpf_genitora: prev.cpf_genitora || latestDoc.cpf_genitora || '' }));
-        }
+        const sortedHistory = [...history].sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime());
+        const latestDoc = sortedHistory[0];
+        setFormData(prev => ({ 
+          ...prev, 
+          genitora_nome: latestDoc.genitora_nome, 
+          bairro: latestDoc.bairro,
+          conselheiro_referencia_id: latestDoc.conselheiro_referencia_id,
+          is_manual_override: true,
+          distribuicao_automatica: false
+        }));
         const childrenMap = new Map<string, ChildData>();
         history.forEach(doc => {
           doc.criancas.forEach(child => {
@@ -94,16 +103,15 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
           });
         });
         setHistoricalChildren(Array.from(childrenMap.values()));
+        setFamilyHistory(history);
       }
     }
-  }, [formData.cpf_genitora, formData.genitora_nome, documents, isEditing]);
+  }, [formData.cpf_genitora, documents, isEditing]);
 
-  // DISTRIBUIÇÃO AUTOMÁTICA AVANÇADA
   useEffect(() => {
     const valUpper = formData.origem.toUpperCase();
     const isNominalNotification = valUpper.startsWith('NOTIFICAÇÃO ');
-    
-    if (!formData.is_manual_override && !isNominalNotification && !isEditing && formData.data_recebimento && formData.tipo_documento) {
+    if (!formData.is_manual_override && !isNominalNotification && !isEditing && formData.data_recebimento) {
       const escala = getEffectiveEscala(formData.data_recebimento);
       let autoProvId = '';
       if (escala && escala.length > 0) {
@@ -112,48 +120,31 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
           d.distribuicao_automatica &&
           !d.origem.toUpperCase().startsWith('NOTIFICAÇÃO ')
         ).length;
-        
         const indexEscala = autoDocsNoMesmoDia % escala.length;
         const provName = escala[indexEscala].toUpperCase();
         const provCouncilor = INITIAL_USERS.find(u => u.nome.toUpperCase() === provName);
         if (provCouncilor) autoProvId = provCouncilor.id;
       }
-
       const councilors = INITIAL_USERS.filter(u => u.perfil === 'CONSELHEIRO' && u.status !== 'BLOQUEADO');
       const relevantDocs = documents
         .filter(d => d.distribuicao_automatica && !d.origem.toUpperCase().startsWith('NOTIFICAÇÃO '))
         .sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime());
-
-      const lastRefId = relevantDocs[0]?.conselheiro_referencia_id;
       const stats = councilors.map(c => ({
         id: c.id,
         count: documents.filter(d => d.conselheiro_referencia_id === c.id && d.distribuicao_automatica && !d.origem.toUpperCase().startsWith('NOTIFICAÇÃO ')).length
       }));
-
+      const lastRefId = relevantDocs[0]?.conselheiro_referencia_id;
       let candidates = stats.filter(s => s.id !== lastRefId);
       if (candidates.length === 0) candidates = stats;
       candidates.sort((a, b) => a.count - b.count);
       const autoRefId = candidates[0]?.id;
-
-      if (autoRefId !== formData.conselheiro_referencia_id || autoProvId !== formData.conselheiro_providencia_id) {
-        setFormData(prev => ({ 
-          ...prev, 
-          conselheiro_referencia_id: autoRefId || prev.conselheiro_referencia_id,
-          conselheiro_providencia_id: autoProvId || prev.conselheiro_providencia_id
-        }));
-      }
+      setFormData(prev => ({ 
+        ...prev, 
+        conselheiro_referencia_id: prev.conselheiro_referencia_id || autoRefId || '',
+        conselheiro_providencia_id: prev.conselheiro_providencia_id || autoProvId || ''
+      }));
     }
-  }, [formData.data_recebimento, formData.is_manual_override, formData.tipo_documento, formData.origem, isEditing, documents]);
-
-  const calculateAge = (birthDate: string) => {
-    if (!birthDate || birthDate.length < 10) return null;
-    const today = new Date();
-    const birth = new Date(birthDate + 'T12:00:00');
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-    return age;
-  };
+  }, [formData.data_recebimento, formData.is_manual_override, formData.origem, isEditing, documents]);
 
   const handleInputChange = (field: string, value: any) => {
     let autoUpdates = {};
@@ -163,10 +154,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
         const councilorName = valUpper.replace('NOTIFICAÇÃO ', '').trim();
         const councilor = INITIAL_USERS.find(u => u.nome.toUpperCase() === councilorName);
         if (councilor) {
-          autoUpdates = { 
-            conselheiro_providencia_id: councilor.id,
-            conselheiro_referencia_id: councilor.id 
-          };
+          autoUpdates = { conselheiro_providencia_id: councilor.id, conselheiro_referencia_id: councilor.id, is_manual_override: true };
         }
       }
     }
@@ -176,11 +164,28 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
   const handleChildChange = (index: number, field: keyof ChildData, value: any) => { 
     const newChildren = [...formData.criancas];
     let updatedChild = { ...newChildren[index], [field]: value };
+    if (field === 'cpf') {
+      const cleanChildCpf = value.replace(/\D/g, '');
+      if (cleanChildCpf.length === 11) {
+        const allChildrenHistory: ChildData[] = [];
+        documents.forEach(d => allChildrenHistory.push(...d.criancas));
+        const childDataFound = allChildrenHistory.find(c => c.cpf?.replace(/\D/g, '') === cleanChildCpf);
+        if (childDataFound) {
+          updatedChild = { 
+            ...updatedChild, 
+            nome: childDataFound.nome.toUpperCase(),
+            data_nascimento: childDataFound.data_nascimento,
+            sexo: childDataFound.sexo,
+            idade_calculada: calculateAge(childDataFound.data_nascimento) || 0
+          };
+        }
+      }
+    }
     if (field === 'data_nascimento') {
       const age = calculateAge(value);
       updatedChild.idade_calculada = age !== null ? age : 0;
       if (age !== null && age >= 18) {
-        alert("IDADE EXCEDIDA: Indivíduos com 18 anos ou mais devem ser atendidos pelo CREAS adulto.");
+        alert("IDADE EXCEDIDA: Encaminhar ao CREAS Adulto.");
         updatedChild.data_nascimento = '';
         updatedChild.idade_calculada = 0;
       }
@@ -197,18 +202,14 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
     setFormData(prev => ({ ...prev, criancas: [...prev.criancas, { nome: '', data_nascimento: '', sexo: '', cpf: '', idade_calculada: 0 }] }));
   };
 
-  const validateForm = () => {
-    const required = [formData.genitora_nome, formData.data_recebimento, formData.hora_rece_bimento, formData.bairro, formData.origem, formData.tipo_documento, formData.informacoes_documento];
-    const hasEmptyRequired = required.some(f => !f || f === '');
-    const hasEmptyChild = formData.criancas.some(c => !c.nome || !c.data_nascimento || !c.sexo);
-    return !hasEmptyRequired && !hasEmptyChild;
-  };
-
   const handleSubmit = (e: React.FormEvent) => { 
     e.preventDefault(); 
     setAttemptedSubmit(true);
-    if (!validateForm()) {
-      alert("CAMPOS OBRIGATÓRIOS PENDENTES: Por favor, preencha os itens destacados em vermelho.");
+    const required = [formData.genitora_nome, formData.data_recebimento, formData.hora_rece_bimento, formData.bairro, formData.origem, formData.canal_comunicado, formData.informacoes_documento];
+    const hasEmptyRequired = required.some(f => !f || f === '');
+    const hasEmptyChild = formData.criancas.some(c => !c.nome || !c.data_nascimento || !c.sexo);
+    if (hasEmptyRequired || hasEmptyChild) {
+      alert("ATENÇÃO: Preencha todos os campos obrigatórios em destaque.");
       return;
     }
     onSubmit(formData, []); 
@@ -222,11 +223,10 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
         <header className="p-8 bg-[#111827] text-white flex justify-between items-center">
           <div>
             <h2 className="text-[20px] font-bold uppercase tracking-tight">{isEditing ? 'Editar Procedimento' : 'Novo Procedimento Digital'}</h2>
-            <p className="text-[13px] font-medium uppercase opacity-60 tracking-widest mt-1">SIMCT Hortolândia - IA Papel Zero</p>
+            <p className="text-[13px] font-medium uppercase opacity-60 tracking-widest mt-1">SIMCT Hortolândia - Inteligência de Dados</p>
           </div>
           <button onClick={onCancel} className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all"><X className="w-6 h-6" /></button>
         </header>
-        
         <form onSubmit={handleSubmit} className="p-10 space-y-10">
           <div className="p-6 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl space-y-6">
             <div className="flex items-center justify-between">
@@ -234,47 +234,33 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
                 <div className="p-3 bg-white rounded-xl shadow-sm border border-[#E5E7EB]"><ShieldCheck className="w-6 h-6 text-[#2563EB]" /></div>
                 <div>
                   <h4 className="text-[13px] font-semibold uppercase text-[#111827]">Gestão de Atribuição</h4>
-                  <p className="text-[11px] font-medium text-[#4B5563] uppercase">Conselheiro de Referência e Providência</p>
+                  <p className="text-[11px] font-medium text-[#4B5563] uppercase">Controle de Referência Técnica</p>
                 </div>
               </div>
-
               {isAdmin && !isEditing && (
                 <div className="flex items-center gap-3 bg-white p-2 px-4 rounded-xl border border-slate-200 shadow-sm">
-                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer" htmlFor="manual-dist">Atribuição Manual (Caso Antigo)</label>
+                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">Sobrescrever Automático</label>
                    <button 
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, is_manual_override: !prev.is_manual_override, distribuicao_automatica: !prev.is_manual_override ? false : true }))}
-                    className="focus:outline-none"
                    >
                      {formData.is_manual_override ? <ToggleRight className="w-8 h-8 text-[#2563EB]" /> : <ToggleLeft className="w-8 h-8 text-slate-300" />}
                    </button>
                 </div>
               )}
             </div>
-
-            {(formData.is_manual_override || isEditing || formData.origem.toUpperCase().startsWith('NOTIFICAÇÃO')) && (
+            {(formData.is_manual_override || isEditing) && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-[#4B5563] uppercase tracking-widest flex items-center gap-2">
-                    Referência {isReferenceLocked && <Lock className="w-3 h-3 text-slate-400" />}
-                  </label>
-                  <select 
-                    disabled={isReferenceLocked}
-                    className={`w-full p-2.5 bg-white border rounded-lg text-[13px] uppercase ${isReferenceLocked ? 'bg-slate-50 text-slate-400 cursor-not-allowed opacity-70' : getErrorClass(formData.conselheiro_referencia_id)}`} 
-                    value={formData.conselheiro_referencia_id} 
-                    onChange={e => handleInputChange('conselheiro_referencia_id', e.target.value)}
-                  >
+                  <label className="text-[11px] font-semibold text-[#4B5563] uppercase tracking-widest flex items-center gap-2">Referência {isReferenceLocked && <Lock className="w-3 h-3" />}</label>
+                  <select disabled={isReferenceLocked} className={`w-full p-2.5 bg-white border rounded-lg text-[13px] uppercase ${isReferenceLocked ? 'opacity-70 cursor-not-allowed' : getErrorClass(formData.conselheiro_referencia_id)}`} value={formData.conselheiro_referencia_id} onChange={e => handleInputChange('conselheiro_referencia_id', e.target.value)}>
                     <option value="">Selecione...</option>
                     {councilors.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-[#4B5563] uppercase tracking-widest">Providência</label>
-                  <select 
-                    className={`w-full p-2.5 bg-white border rounded-lg text-[13px] uppercase ${getErrorClass(formData.conselheiro_providencia_id)}`} 
-                    value={formData.conselheiro_providencia_id} 
-                    onChange={e => handleInputChange('conselheiro_providencia_id', e.target.value)}
-                  >
+                  <select className={`w-full p-2.5 bg-white border rounded-lg text-[13px] uppercase ${getErrorClass(formData.conselheiro_providencia_id)}`} value={formData.conselheiro_providencia_id} onChange={e => handleInputChange('conselheiro_providencia_id', e.target.value)}>
                     <option value="">Selecione...</option>
                     {councilors.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                   </select>
@@ -282,7 +268,6 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
               </div>
             )}
           </div>
-
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -293,43 +278,31 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Tipo de Documento *</label>
-                <select className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium uppercase outline-none transition-all ${getErrorClass(formData.tipo_documento)}`} value={formData.tipo_documento} onChange={e => handleInputChange('tipo_documento', e.target.value)}>
+                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Canal do Comunicado *</label>
+                <select className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium uppercase outline-none transition-all ${getErrorClass(formData.canal_comunicado)}`} value={formData.canal_comunicado} onChange={e => handleInputChange('canal_comunicado', e.target.value)}>
                   <option value="">Selecione...</option>
-                  {TIPOS_DOCUMENTO.map(t => <option key={t} value={t}>{t}</option>)}
+                  {CANAIS_COMUNICACAO.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Data e Horário de Recebimento *</label>
+                <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Data e Horário *</label>
                 <div className="flex gap-3">
-                  <input 
-                    type="date" 
-                    className={`flex-1 p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium outline-none transition-all ${getErrorClass(formData.data_recebimento)}`} 
-                    value={formData.data_recebimento} 
-                    onChange={e => handleInputChange('data_recebimento', e.target.value)} 
-                  />
-                  <input 
-                    type="time" 
-                    className={`w-32 p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium outline-none transition-all ${getErrorClass(formData.hora_rece_bimento)}`} 
-                    value={formData.hora_rece_bimento} 
-                    onChange={e => handleInputChange('hora_rece_bimento', e.target.value)} 
-                  />
+                  <input type="date" className={`flex-1 p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium outline-none ${getErrorClass(formData.data_recebimento)}`} value={formData.data_recebimento} onChange={e => handleInputChange('data_recebimento', e.target.value)} />
+                  <input type="time" className={`w-32 p-3 bg-[#F9FAFB] border rounded-xl text-[14px] font-medium outline-none ${getErrorClass(formData.hora_rece_bimento)}`} value={formData.hora_rece_bimento} onChange={e => handleInputChange('hora_rece_bimento', e.target.value)} />
                 </div>
               </div>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">Mãe / Responsável Legal *</label>
-                <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] uppercase outline-none transition-all ${getErrorClass(formData.genitora_nome)}`} value={formData.genitora_nome} onChange={e => handleInputChange('genitora_nome', e.target.value.toUpperCase())} placeholder="NOME COMPLETO DA GENITORA" />
+                <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] uppercase outline-none ${getErrorClass(formData.genitora_nome)}`} value={formData.genitora_nome} onChange={e => handleInputChange('genitora_nome', e.target.value.toUpperCase())} placeholder="NOME DA GENITORA" />
               </div>
               <div className="space-y-2">
                 <label className="text-[13px] font-semibold text-[#4B5563] uppercase tracking-widest">CPF da Genitora</label>
-                <input type="text" className="w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] outline-none transition-all" value={formData.cpf_genitora} onChange={e => handleInputChange('cpf_genitora', e.target.value.replace(/\D/g, ''))} placeholder="000.000.000-00" maxLength={11} />
+                <input type="text" className="w-full p-3 bg-[#F9FAFB] border rounded-xl text-[14px] outline-none" value={formData.cpf_genitora} onChange={e => handleInputChange('cpf_genitora', e.target.value.replace(/\D/g, ''))} placeholder="000.000.000-00" maxLength={11} />
               </div>
             </div>
           </div>
-
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="text-[15px] font-bold text-[#111827] uppercase tracking-widest flex items-center gap-2"><Baby className="w-5 h-5 text-[#2563EB]" /> Crianças/Adolescentes</h3>
@@ -343,20 +316,15 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
                     <label className="text-[11px] font-bold text-[#4B5563] uppercase">Nome Completo *</label>
                     <input type="text" className={`w-full p-3 bg-[#F9FAFB] border rounded-xl text-[13px] uppercase outline-none ${getErrorClass(crianca.nome)}`} value={crianca.nome} onChange={e => handleChildChange(idx, 'nome', e.target.value.toUpperCase())} />
                   </div>
-                  
                   <div className={idx === 0 ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "space-y-1"}>
                     <div className="space-y-1">
                       <label className="text-[11px] font-bold text-[#4B5563] uppercase">CPF da Criança</label>
                       <input type="text" className="w-full p-3 bg-[#F9FAFB] border rounded-xl text-[13px] outline-none" value={crianca.cpf || ''} onChange={e => handleChildChange(idx, 'cpf', e.target.value.replace(/\D/g, ''))} placeholder="000.000.000-00" maxLength={11} />
                     </div>
                     {idx === 0 && (
-                      <div className="space-y-1 animate-in slide-in-from-top-2">
+                      <div className="space-y-1">
                         <label className="text-[11px] font-bold text-[#4B5563] uppercase">Endereço (Bairro) *</label>
-                        <select 
-                          className={`w-full p-3 bg-white border rounded-xl text-[13px] uppercase outline-none transition-all ${getErrorClass(formData.bairro)}`} 
-                          value={formData.bairro} 
-                          onChange={e => handleInputChange('bairro', e.target.value)}
-                        >
+                        <select className={`w-full p-3 bg-white border rounded-xl text-[13px] uppercase outline-none ${getErrorClass(formData.bairro)}`} value={formData.bairro} onChange={e => handleInputChange('bairro', e.target.value)}>
                           <option value="">Selecione...</option>
                           {BAIRROS.map(b => <option key={b} value={b}>{b}</option>)}
                         </select>
@@ -378,10 +346,9 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({
               </div>
             ))}
           </div>
-
           <div className="space-y-4">
              <h3 className="text-[15px] font-bold text-[#111827] uppercase tracking-widest flex items-center gap-2"><AlertCircle className="w-5 h-5 text-[#2563EB]" /> Conteúdo do Relato *</h3>
-             <textarea className={`w-full p-4 bg-[#F9FAFB] border rounded-xl text-[14px] min-h-[120px] uppercase outline-none transition-all ${getErrorClass(formData.informacoes_documento)}`} value={formData.informacoes_documento} onChange={e => handleInputChange('informacoes_documento', e.target.value.toUpperCase())} placeholder="DESCREVA OS DETALHES DO DOCUMENTO OU DENÚNCIA..." />
+             <textarea className={`w-full p-4 bg-[#F9FAFB] border rounded-xl text-[14px] min-h-[120px] uppercase outline-none transition-all ${getErrorClass(formData.informacoes_documento)}`} value={formData.informacoes_documento} onChange={e => handleInputChange('informacoes_documento', e.target.value.toUpperCase())} placeholder="DESCREVA OS DETALHES DO DOCUMENTO..." />
           </div>
           <button type="submit" className="w-full py-5 bg-[#111827] text-white rounded-xl font-bold uppercase text-[14px] tracking-widest shadow-lg hover:bg-[#2563EB] transition-all flex items-center justify-center gap-3"><Save className="w-5 h-5" /> Registrar Procedimento Digital</button>
         </form>

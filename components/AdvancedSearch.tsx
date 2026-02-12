@@ -164,7 +164,6 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ documents, onSelectDoc 
                   <td className="px-8 py-6 font-black text-slate-900 text-sm uppercase tracking-tight">{doc.crianca_nome || 'N/I'}</td>
                   <td className="px-8 py-6 text-[10px] text-slate-500 font-black uppercase">{doc.genitora_nome || 'N/I'}</td>
                   <td className="px-8 py-6 text-[10px] text-blue-600 font-black uppercase">{doc.origem}</td>
-                  {/* Corrected property access from doc.data_rece_bimento to doc.data_recebimento */}
                   <td className="px-8 py-6 text-xs font-black text-slate-700">{new Date(doc.data_recebimento).toLocaleDateString('pt-BR')}</td>
                   <td className="px-8 py-6 text-right"><ArrowRight className="w-5 h-5 text-slate-200" /></td>
                 </tr>

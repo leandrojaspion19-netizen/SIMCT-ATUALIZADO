@@ -58,7 +58,7 @@ export interface MedidaAplicada {
 export interface Documento {
   id: string;
   origem: string;
-  tipo_documento: string;
+  canal_comunicado: string; 
   data_recebimento: string;
   hora_rece_bimento?: string;
   periodo_recebimento?: 'COMERCIAL' | 'PLANTAO';
