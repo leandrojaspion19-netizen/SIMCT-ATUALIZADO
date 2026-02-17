@@ -27,7 +27,7 @@ const AIStatisticsAnalyzer: React.FC<AIStatisticsAnalyzerProps> = ({ stats, tota
 
   const getSystemContext = () => {
     return `
-      Você é o "Analista SICT de Hortolândia", assistente de IA especialista em dados do Conselho Tutelar e ECA.
+      Você é o "Analista SIMCT de Hortolândia", assistente de IA especialista em dados do Conselho Tutelar e ECA.
       
       BASE DE DADOS ATUALIZADA:
       - Total de Prontuários: ${totalDocs}
@@ -76,12 +76,12 @@ const AIStatisticsAnalyzer: React.FC<AIStatisticsAnalyzerProps> = ({ stats, tota
 
       const botResponse: Message = { 
         role: 'model', 
-        text: response.text || "Não foi possível gerar a análise técnica." 
+        text: response.text || "Não foi possível gerar a análise técnica SIMCT." 
       };
       setChatHistory(prev => [...prev, botResponse]);
     } catch (err: any) {
       console.error(err);
-      setError("Erro de conexão com o servidor de Inteligência de Dados.");
+      setError("Erro de conexão com o servidor de Inteligência de Dados SIMCT.");
     } finally {
       setLoading(false);
     }
@@ -91,12 +91,12 @@ const AIStatisticsAnalyzer: React.FC<AIStatisticsAnalyzerProps> = ({ stats, tota
     <div className="mt-8 space-y-6">
       {chatHistory.length === 0 ? (
         <button 
-          onClick={() => handleSendMessage(undefined, "Faça uma análise institucional completa: Quais direitos fundamentais são mais violados? Qual bairro exige prioridade de política pública? Qual agente mais viola direitos e qual a sua sugestão baseada no ECA para o CMDCA?")}
+          onClick={() => handleSendMessage(undefined, "Faça uma análise institucional completa SIMCT: Quais direitos fundamentais são mais violados? Qual bairro exige prioridade de política pública? Qual agente mais viola direitos e qual a sua sugestão baseada no ECA para o CMDCA?")}
           disabled={loading || totalDocs === 0}
           className="w-full py-8 bg-gradient-to-r from-blue-700 to-indigo-700 text-white rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] hover:scale-[1.01] active:scale-[0.99] transition-all shadow-xl flex items-center justify-center gap-4"
         >
           {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Sparkles className="w-6 h-6 text-amber-300 fill-amber-300" />}
-          {loading ? 'Sincronizando Banco de Dados...' : 'Iniciar Diagnóstico de Políticas Públicas com IA'}
+          {loading ? 'Sincronizando Banco de Dados SIMCT...' : 'Iniciar Diagnóstico de Políticas Públicas com IA SIMCT'}
         </button>
       ) : (
         <div className="bg-slate-900 border border-white/10 rounded-[3rem] flex flex-col h-[650px] shadow-2xl overflow-hidden animate-in zoom-in-95">
@@ -104,7 +104,7 @@ const AIStatisticsAnalyzer: React.FC<AIStatisticsAnalyzerProps> = ({ stats, tota
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-500/20 rounded-2xl text-blue-400"><Bot className="w-6 h-6" /></div>
               <div>
-                <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-blue-400">Analista Digital SICT</h4>
+                <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-blue-400">Analista Digital SIMCT</h4>
                 <p className="text-sm font-bold text-white uppercase">Gestão de Inteligência Hortolândia</p>
               </div>
             </div>
@@ -128,19 +128,12 @@ const AIStatisticsAnalyzer: React.FC<AIStatisticsAnalyzerProps> = ({ stats, tota
 
           <form onSubmit={handleSendMessage} className="p-8 bg-slate-800/50 border-t border-white/10">
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Pergunte sobre direitos, bairros ou sugestões do ECA..."
-                className="w-full bg-slate-900 border border-white/10 rounded-2xl pl-8 pr-16 py-5 text-sm text-white outline-none focus:border-blue-500 font-bold"
-                value={userInput}
-                onChange={e => setUserInput(e.target.value)}
-                disabled={loading}
-              />
+              <input type="text" placeholder="Pergunte sobre direitos, bairros ou sugestões do ECA..." className="w-full bg-slate-900 border border-white/10 rounded-2xl pl-8 pr-16 py-5 text-sm text-white outline-none focus:border-blue-500 font-bold" value={userInput} onChange={e => setUserInput(e.target.value)} disabled={loading} />
               <button type="submit" disabled={loading || !userInput.trim()} className="absolute right-3 top-1/2 -translate-y-1/2 p-4 bg-blue-600 text-white rounded-xl shadow-xl"><Send className="w-5 h-5" /></button>
             </div>
             <div className="flex items-center justify-center gap-2 mt-4 opacity-40">
               <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <p className="text-[9px] text-white font-black uppercase tracking-[0.2em]">Diagnóstico em tempo real conforme diretrizes do SGD</p>
+              <p className="text-[9px] text-white font-black uppercase tracking-[0.2em]">SIMCT Diagnóstico em tempo real</p>
             </div>
           </form>
         </div>

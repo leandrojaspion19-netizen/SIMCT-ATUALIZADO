@@ -1,4 +1,3 @@
-
 export type UserRole = 'ADMIN' | 'CONSELHEIRO' | 'ADMINISTRATIVO' | 'SUPLENTE';
 
 export type UserStatus = 'ATIVO' | 'BLOQUEADO' | 'INATIVO' | 'AFASTADO';
@@ -34,13 +33,21 @@ export type DocumentStatus =
   | 'MONITORAMENTO'
   | 'SOLICITAR_REUNIAO_REDE'
   | 'EMAIL_ENCAMINHADO'
+  | 'EM_PREENCHIMENTO'
   | 'AGUARDANDO_VALIDACAO'
-  | 'OFICIALIZADO';
+  | 'OFICIALIZADO'
+  | 'CONCLUIDO';
 
 export interface MedidaConfirmacao {
   usuario_id: string;
   usuario_nome: string;
   data_hora: string;
+}
+
+export interface EdicaoRegistro {
+  usuario_nome: string;
+  data_hora: string;
+  campos_alterados: string[];
 }
 
 export interface MedidaAplicada {
@@ -52,7 +59,7 @@ export interface MedidaAplicada {
   data_lancamento: string;
   conselheiros_requeridos: string[]; 
   confirmacoes: MedidaConfirmacao[];
-  requisicao_detalhes?: RequisicaoServico; // Novo campo para Art 136 III a
+  requisicao_detalhes?: RequisicaoServico;
 }
 
 export interface Documento {
@@ -67,7 +74,10 @@ export interface Documento {
   criancas: ChildData[]; 
   genitora_nome: string;
   cpf_genitora?: string; 
-  bairro: string;
+  bairro: string; // Agora referenciado como Bairro da Criança/Adolescente
+  logradouro?: string;
+  numero_complemento?: string;
+  cep?: string;
   informacoes_documento: string; 
   violacoesSipia: SipiaViolation[];
   agentesVioladores: AgenteVioladorEntry[];
@@ -87,6 +97,11 @@ export interface Documento {
   distribuicao_automatica: boolean;
   Status_Assinatura?: string; 
   is_manual_override?: boolean;
+  historico_edicoes?: EdicaoRegistro[];
+  is_improcedente?: boolean;
+  justificativa_improcedencia?: string;
+  complemento_medidas?: string;
+  atribuicoes_136?: string[];
 }
 
 export interface Log {
@@ -115,7 +130,7 @@ export interface ChildData {
   cpf?: string;
   idade_calculada?: number;
   categoria_idade?: string;
-  sexo: string;
+  genero_identidade: string; // Unificado Diretriz 37.3
 }
 
 export interface SipiaViolation {
@@ -165,5 +180,5 @@ export interface MonitoringInfo {
   ativadoPorNome?: string;
   dataAtivacao?: string;
   historicoPrazos?: MonitoringHistory[];
-  requisicoes?: RequisicaoServico[]; // Novo campo para rastrear requisições do Art 136 III a
+  requisicoes?: RequisicaoServico[];
 }

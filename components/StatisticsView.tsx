@@ -2,7 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { TrendingUp, Users, ShieldAlert, Activity, Filter, CalendarDays, X, BarChart, ArrowUpRight, Sparkles, ClipboardList, Building2, UserCheck, MailWarning, MapPin, Map, Scale, Gavel, History, FileText, AlertCircle, Stethoscope, GraduationCap, Heart, ShieldCheck, Zap, Briefcase, Users2, Clock, LayoutList, Sun } from 'lucide-react';
 import { Documento, User as UserType, SipiaViolation, AgenteVioladorEntry } from '../types';
-import { TIPOS_VIOLENCIA, STATUS_LABELS, INITIAL_USERS, BAIRROS } from '../constants';
+// Removed non-existent import TIPOS_VIOLENCIA which was causing a compilation error
+import { STATUS_LABELS, INITIAL_USERS, BAIRROS } from '../constants';
 import AIStatisticsAnalyzer from './AIStatisticsAnalyzer';
 
 interface StatisticsViewProps {

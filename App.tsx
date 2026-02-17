@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
 import { User, Documento, Log, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
-/* Removed unused and non-existent checkIsPlantao from imports to fix compilation error */
 import { INITIAL_USERS, UserWithPassword } from './constants';
 import DocumentList from './components/DocumentList';
 import DocumentRegistration from './components/DocumentRegistration';
@@ -80,6 +78,7 @@ const App: React.FC = () => {
   const [password, setPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [forceDirectEdit, setForceDirectEdit] = useState(false);
 
   useEffect(() => {
     const savedDocs = localStorage.getItem('pt_docs');
@@ -123,14 +122,27 @@ const App: React.FC = () => {
 
   const addLog = useCallback((docId: string, acao: string) => {
     if (!currentUser) return;
-    const newLog: Log = { id: `log-${Date.now()}`, documento_id: docId, usuario_id: currentUser.id, usuario_nome: currentUser.nome, acao, data_hora: new Date().toISOString() };
+    const newLog: Log = { 
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, 
+      documento_id: docId, 
+      usuario_id: currentUser.id, 
+      usuario_nome: currentUser.nome, 
+      acao, 
+      data_hora: new Date().toISOString() 
+    };
     setLogs(prev => [newLog, ...prev]);
   }, [currentUser]);
+
+  const handleOpenDocument = useCallback((id: string, isFromReference: boolean = false) => {
+    setSelectedDocId(id);
+    if (isFromReference) setForceDirectEdit(true);
+    addLog(id, `VISUALIZAÇÃO: Documento aberto por ${currentUser?.nome}.`);
+  }, [addLog, currentUser]);
 
   const handleDocumentSubmit = (data: any, files: File[]) => {
     if (editingDocId) {
       setDocuments(prev => prev.map(d => d.id === editingDocId ? { ...d, ...data } : d));
-      addLog(editingDocId, `Prontuário técnico atualizado por ${currentUser?.nome}.`);
+      addLog(editingDocId, `EDIÇÃO: Registro atualizado por ${currentUser?.nome}.`);
       setEditingDocId(null);
       handleNavigate('dashboard');
       return;
@@ -138,11 +150,16 @@ const App: React.FC = () => {
     const id = `doc-${Math.random().toString(36).substr(2, 9)}`;
     const newDoc: Documento = { ...data, id, criado_em: new Date().toISOString(), status: ['NAO_LIDO'], criado_por_id: currentUser!.id, ciencia_registrada_por: [], distribuicao_automatica: !data.is_manual_override };
     setDocuments(prev => [newDoc, ...prev]);
-    addLog(id, "Novo procedimento registrado no sistema.");
+    addLog(id, `CRIAÇÃO: Procedimento registrado no SIMCT por ${currentUser?.nome}.`);
     handleNavigate('dashboard');
   };
 
-  const handleNavigate = (tab: typeof activeTab) => { setSelectedDocId(null); setEditingDocId(null); setActiveTab(tab); };
+  const handleNavigate = (tab: typeof activeTab) => { 
+    setSelectedDocId(null); 
+    setEditingDocId(null); 
+    setForceDirectEdit(false);
+    setActiveTab(tab); 
+  };
 
   const activeAlert = useMemo(() => {
     if (!currentUser) return null;
@@ -184,18 +201,28 @@ const App: React.FC = () => {
     if (selectedDocId) {
       const doc = documents.find(d => d.id === selectedDocId);
       if (!doc) return null;
-      return <DocumentView document={doc} allDocuments={documents} files={[]} logs={logs.filter(l => l.documento_id === selectedDocId)} currentUser={currentUser} isReadOnly={isAdministrative} onBack={() => setSelectedDocId(null)} onEdit={() => { setEditingDocId(doc.id); setActiveTab('edit'); }} onDelete={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onUpdateStatus={(id, s) => setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: s } : d))} onUpdateDocument={(id, fields) => setDocuments(prev => prev.map(d => d.id === id ? {...d, ...fields} : d))} onAddLog={addLog} onScience={() => {}} />;
+      return <DocumentView document={doc} allDocuments={documents} files={[]} logs={logs.filter(l => l.documento_id === selectedDocId)} currentUser={currentUser} isReadOnly={isAdministrative} forceEdit={forceDirectEdit} onBack={() => setSelectedDocId(null)} onEdit={() => { setEditingDocId(doc.id); setActiveTab('edit'); }} onDelete={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onUpdateStatus={(id, s) => setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: s } : d))} onUpdateDocument={(id, fields) => setDocuments(prev => prev.map(d => d.id === id ? {...d, ...fields} : d))} onAddLog={addLog} onScience={() => {}} />;
     }
 
     switch (activeTab) {
       case 'dashboard': 
-        return <DocumentList documents={documents} currentUser={currentUser} isReadOnly={false} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
+        const dashboardDocs = documents.filter(d => {
+          if (d.status.includes('EM_PREENCHIMENTO')) {
+            return d.conselheiro_referencia_id === currentUser.id;
+          }
+          return true;
+        });
+        return <DocumentList documents={dashboardDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={handleOpenDocument} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
       case 'my-docs':
-        const myReferencedDocs = documents.filter(d => d.conselheiro_referencia_id === currentUser.id || d.conselheiro_providencia_id === currentUser.id);
-        return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={setSelectedDocId} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
-      case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={setSelectedDocId} onUpdateMonitoring={(id, m) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); addLog(id, "Prorrogação de prazo registrada."); }} onRemoveMonitoring={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} isReadOnly={isAdministrative} />;
+        const myReferencedDocs = documents.filter(d => 
+          d.conselheiro_referencia_id === currentUser.id || 
+          d.conselheiro_providencia_id === currentUser.id ||
+          (d.conselheiros_providencia_nomes && d.conselheiros_providencia_nomes.some(n => n.toUpperCase() === currentUser.nome.toUpperCase()))
+        );
+        return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={(id) => handleOpenDocument(id, true)} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
+      case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={handleOpenDocument} onUpdateMonitoring={(id, m) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); addLog(id, "Prorrogação de prazo registrada."); }} onRemoveMonitoring={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} isReadOnly={isAdministrative} />;
       case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={isLud || currentUser.perfil === 'ADMINISTRATIVO'} />;
-      case 'search': return <AdvancedSearch documents={documents} currentUser={currentUser} onSelectDoc={setSelectedDocId} />;
+      case 'search': return <AdvancedSearch documents={documents} currentUser={currentUser} onSelectDoc={handleOpenDocument} />;
       case 'logs': return <AuditLogViewer logs={logs} />;
       case 'settings': return <SettingsView currentUser={currentUser} onUpdatePassword={(p) => { setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, senha: p } : u)); return true; }} />;
       case 'statistics': return <StatisticsView documents={documents} />;
@@ -223,7 +250,7 @@ const App: React.FC = () => {
             if (user.status === 'BLOQUEADO') { setLoginError("ACESSO BLOQUEADO: PROCURE A ADM GERAL."); return; } 
             if (!acceptedTerms) { setLoginError("Obrigatório aceitar termos LGPD."); return; } 
             setCurrentUser(user); 
-            addLog('SISTEMA', 'Sessão iniciada com sucesso.'); 
+            addLog('SISTEMA', 'Sessão SIMCT iniciada com sucesso.'); 
           }} className="space-y-6">
             <div className="relative">
               <input placeholder="USUÁRIO" className="w-full p-4 pl-12 bg-slate-50 border border-[#E5E7EB] rounded-xl outline-none font-bold uppercase focus:border-[#2563EB] transition-all" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} />
@@ -238,7 +265,7 @@ const App: React.FC = () => {
               <label className="text-[12px] font-medium uppercase text-[#4B5563]">Aceito LGPD e Sigilo Profissional</label>
             </div>
             {loginError && <div className="p-4 bg-red-50 text-red-700 text-[12px] font-bold uppercase rounded-xl border border-red-100">{loginError}</div>}
-            <button type="submit" className="w-full py-4 bg-[#111827] text-white rounded-xl font-bold uppercase text-[13px] tracking-widest shadow-lg hover:bg-[#2563EB] transition-all">Acessar Sistema</button>
+            <button type="submit" className="w-full py-4 bg-[#111827] text-white rounded-xl font-bold uppercase text-[13px] tracking-widest shadow-lg hover:bg-[#2563EB] transition-all">Acessar SIMCT</button>
           </form>
         </div>
       </div>
