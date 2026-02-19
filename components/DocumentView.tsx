@@ -1,418 +1,413 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowLeft, ShieldCheck, Scale, X, Edit2, Check, Gavel, LayoutList, Users2, Lock, Zap, Clock, AlertCircle, Info, UserRound, MessageSquareWarning, Plus, Save, Search, Trash2, Sparkles, Loader2, BellRing, CheckCircle2, Fingerprint, Baby, ShieldAlert, ClipboardCheck, ShieldEllipsis, History, ChevronDown, ChevronUp, FolderTree, Building2, ChevronRight, Share2, FileText, AlertTriangle, Building, Users, Ban, FileWarning, PencilLine, RefreshCw, Footprints, ClipboardList, CheckSquare, Square, HeartHandshake, BookOpen, Megaphone, Printer, SendHorizonal, ListFilter } from 'lucide-react';
-import { Documento, DocumentFile, Log, User as UserType, DocumentStatus, MedidaAplicada, SipiaViolation, AgenteVioladorEntry, EdicaoRegistro, RequisicaoServico } from '../types';
-import { STATUS_LABELS, INITIAL_USERS, MEDIDAS_ECA_DESCRICAO, SIPIA_HIERARCHY, AGENTES_VIOLADORES_ESTRUTURA, MEDIDAS_PROTECAO_ECA, getEffectiveEscala, REDE_HORTOLANDIA } from '../constants';
-import FamilyHistoryModal from './FamilyHistoryModal';
-
-const MEDIDAS_101_ECA = [
-  { id: 'I', label: 'I - Encaminhamento: aos pais ou responsável, mediante termo de responsabilidade.' },
-  { id: 'II', label: 'II - Orientação: apoio e acompanhamento temporários.' },
-  { id: 'III', label: 'III - Educação: matrícula e frequência obrigatórias em estabelecimento oficial de ensino fundamental.' },
-  { id: 'IV', label: 'IV - Programas: inclusão em serviços e programas oficiais ou comunitários de proteção, apoio e promoção da família, da criança e do adolescente (Lei 13.257/2016).' },
-  { id: 'V', label: 'V - Saúde: requisição de tratamento médico, psicológico ou psiquiátrico, em regime hospitalar ou ambulatorial, extensivo às famílias (Lei 15.280/2025).' },
-  { id: 'VI', label: 'VI - Tratamento Específico: inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.' },
-  { id: 'VII', label: 'VII - Acolhimento: acolhimento institucional (Lei 12.010/2009).' }
-];
-
-const MEDIDAS_129_ECA = [
-  { id: 'I', label: 'I - Apoio à Família: encaminhamento a serviços e programas oficiais ou comunitários de proteção, apoio e promoção da família (Lei 13.257/2016).' },
-  { id: 'II', label: 'II - Tratamento de Adicções: inclusão em programa oficial ou comunitário de auxílio, orientação e tratamento a alcoólatras e toxicômanos.' },
-  { id: 'III', label: 'III - Saúde Mental: encaminhamento a tratamento psicológico ou psiquiátrico.' },
-  { id: 'IV', label: 'IV - Cursos de Orientação: encaminhamento a cursos ou programs de orientação.' },
-  { id: 'V', label: 'V - Obrigação Escolar: obrigação de matricular o filho ou pupilo e acompanhar sua frequência e aproveitamento escolar.' },
-  { id: 'VI', label: 'VI - Tratamento Especializado: obrigação de encaminhar a criança ou adolescente a tratamento especializado.' },
-  { id: 'VII', label: 'VII - Advertência: advertência formal (registrada em termo).' }
-];
-
-const ATRIBUICOES_136_ECA = [
-  { id: 'I', label: 'I - Atender Crianças/Adolescentes: (Arts. 98 e 105).' },
-  { id: 'II', label: 'II - Atender/Aconselhar Pais: (Art. 129).' },
-  { id: 'III-a', label: 'III - Promover Execução: (a) Requisitar serviços de saúde, educação, assistência social (Lei 15.268/2025), previdência, trabalho e segurança.' },
-  { id: 'III-b', label: 'III - Representar junto à autoridade judiciária nos casos de descumprimento injustificado de suas deliberações.' },
-  { id: 'IV/V', label: 'IV/V - Encaminhamentos: Notícia de fato ao MP ou casos à autoridade judiciária.' },
-  { id: 'VII', label: 'VII - Notificações: Expedir notificações oficiais.' },
-  { id: 'VIII', label: 'VIII - Certidões: Requisitar certidões de nascimento/óbito.' },
-  { id: 'XI', label: 'XI - Poder Familiar: Representar ao MP para perda/suspensão do poder familiar.' },
-  { id: 'XIII-XX', label: 'XIII a XX - Lei Henry Borel (14.344/22): Ações articuladas contra violência doméstica, representação para afastamento do agressor e medidas protetivas de urgência.' }
-];
-
-const SITUACOES_PRONTUARIO = [
-  { id: 'EM_PREENCHIMENTO', label: 'EM PREENCHIMENTO (Rascunho)' },
-  { id: 'AGUARDANDO_VALIDACAO', label: 'AGUARDANDO VALIDAÇÃO' },
-  { id: 'MONITORAMENTO', label: 'EM MONITORAMENTO' },
-  { id: 'CONCLUIDO', label: 'CONCLUÍDO' },
-  { id: 'ARQUIVADO', label: 'ARQUIVADO' }
-];
+// DIRETRIZ 80/81: Protocolo de Revalidação e Indicadores Visuais de Alteração
+import React, { useState, useMemo } from 'react';
+import { 
+  ArrowLeft, Scale, X, Check, Clock, AlertCircle, Info, 
+  Save, ShieldAlert, History, ClipboardList, CheckSquare, Square, 
+  SendHorizonal, ListChecks, Activity, Ban, Calendar, UserRound, 
+  CheckCircle, CheckCircle2, ChevronDown, Play, RotateCcw, Users2, Edit2, Zap
+} from 'lucide-react';
+import { 
+  Documento, Log, User as UserType, DocumentStatus, 
+  MedidaAplicada, SipiaViolation, AgenteVioladorEntry, LogType, SnapshotComparativo
+} from '../types';
+import { 
+  STATUS_LABELS, INITIAL_USERS, 
+  SIPIA_HIERARCHY, AGENTES_VIOLADORES_ESTRUTURA, 
+  getEffectiveEscala, MEDIDAS_101_ECA, MEDIDAS_129_ECA, ATRIBUICOES_136_ECA
+} from '../constants';
 
 interface DocumentViewProps {
   document: Documento;
   allDocuments: Documento[]; 
-  files: DocumentFile[];
-  logs: Log[];
   currentUser: UserType;
+  files: any[];
+  logs: Log[];
   isReadOnly?: boolean;
   forceEdit?: boolean;
   onBack: () => void;
   onEdit: () => void;
   onDelete: (id: string) => void;
-  onUpdateStatus: (id: string, status: DocumentStatus[]) => void;
+  onUpdateStatus: (id: string, s: DocumentStatus[]) => void;
   onUpdateDocument: (id: string, fields: Partial<Documento>) => void;
-  onAddLog: (docId: string, acao: string) => void;
+  onAddLog: (docId: string, acao: string, tipo?: LogType) => void;
   onScience: (id: string) => void;
 }
 
 const DocumentView: React.FC<DocumentViewProps> = ({ 
   document: doc, 
-  allDocuments,
-  logs,
   currentUser, 
-  isReadOnly,
-  forceEdit,
   onBack, 
-  onEdit,
-  onUpdateStatus,
   onUpdateDocument,
   onAddLog
 }) => {
-  const [showSipiaModal, setShowSipiaModal] = useState(false);
-  const [showAgenteModal, setShowAgenteModal] = useState(false);
-  const [showFamilyHistoryModal, setShowFamilyHistoryModal] = useState(false);
-  const [showAuditHistory, setShowAuditHistory] = useState(false);
-  const [showRequisicaoModal, setShowRequisicaoModal] = useState(false);
-  
+  const [activeSection, setActiveSection] = useState<string | null>(null);
   const [tempViolacoes, setTempViolacoes] = useState<SipiaViolation[]>(doc.violacoesSipia || []);
   const [tempAgentes, setTempAgentes] = useState<AgenteVioladorEntry[]>(doc.agentesVioladores || []);
-  
-  const [selectedMedidas101, setSelectedMedidas101] = useState<string[]>(
-    (doc.medidas_detalhadas || [])
-      .filter(m => m.artigo_inciso.startsWith('Art. 101')) 
-      .map(m => m.artigo_inciso.replace('Art. 101, ', ''))
-  );
-  
-  const [selectedMedidas129, setSelectedMedidas129] = useState<string[]>(
-    (doc.medidas_detalhadas || [])
-      .filter(m => m.artigo_inciso.startsWith('Art. 129'))
-      .map(m => m.artigo_inciso.replace('Art. 129, ', ''))
-  );
-
+  const [selectedMedidas101, setSelectedMedidas101] = useState<string[]>((doc.medidas_detalhadas || []).filter(m => m.artigo_inciso.startsWith('Art. 101')).map(m => m.artigo_inciso.replace('Art. 101, ', '')));
+  const [selectedMedidas129, setSelectedMedidas129] = useState<string[]>((doc.medidas_detalhadas || []).filter(m => m.artigo_inciso.startsWith('Art. 129')).map(m => m.artigo_inciso.replace('Art. 129, ', '')));
   const [selectedAtribuicoes136, setSelectedAtribuicoes136] = useState<string[]>(doc.atribuicoes_136 || []);
-
-  const [complementoMedidas, setComplementoMedidas] = useState<string>(doc.complemento_medidas || '');
+  const [obsMonitoramento, setObsMonitoramento] = useState<string>(doc.observacao_monitoramento || '');
   const [isImprocedente, setIsImprocedente] = useState<boolean>(doc.is_improcedente || false);
   const [justificativaImprocedencia, setJustificativaImprocedencia] = useState<string>(doc.justificativa_improcedencia || '');
-  
-  const [tempStatus, setTempStatus] = useState<DocumentStatus>(
-    (doc.status[doc.status.length - 1] as DocumentStatus) || 'EM_PREENCHIMENTO'
-  );
 
-  const [newRequisicao, setNewRequisicao] = useState<{
-    area: string;
-    subGrupo: string;
-    equipamento: string;
-    prazoDias: number;
-    detalhes: string;
-  }>({
-    area: '',
-    subGrupo: '',
-    equipamento: '',
-    prazoDias: 10,
-    detalhes: ''
-  });
+  // DIRETRIZ 78/80: SOBERANIA TÉCNICA
+  const isImediataResponsavel = doc.conselheiro_providencia_id === currentUser.id;
+  const canEditTechnicalFields = isImediataResponsavel; 
 
-  const needsImmediateMP = selectedMedidas101.includes('VII');
-  const isReqAreaSelected = selectedAtribuicoes136.includes('III-a');
-
-  const hasExpiredRequisicao = useMemo(() => {
-    if (!doc.monitoramento?.requisicoes) return false;
-    const now = new Date();
-    return doc.monitoramento.requisicoes.some(r => !r.excluidoDoMonitoramento && new Date(r.dataFinal) < now);
-  }, [doc.monitoramento]);
-
-  const familyHistory = useMemo(() => {
-    return allDocuments.filter(d => {
-       if (d.id === doc.id) return false;
-       const matchCpf = doc.cpf_genitora && d.cpf_genitora && doc.cpf_genitora.replace(/\D/g, '') === d.cpf_genitora.replace(/\D/g, '');
-       const matchNome = doc.genitora_nome && d.genitora_nome && doc.genitora_nome.trim().toUpperCase() === d.genitora_nome.trim().toUpperCase();
-       return matchCpf || matchNome;
+  const validationTracker = useMemo(() => {
+    const trio = doc.conselheiros_providencia_nomes || [];
+    const confirmacoes = doc.medidas_detalhadas?.[0]?.confirmacoes || [];
+    return trio.map(name => {
+      const match = confirmacoes.find(c => c.usuario_nome.toUpperCase().includes(name.toUpperCase()));
+      return { name, validated: !!match, timestamp: match?.usuario_nome.split(' - ')[1] || null };
     });
-  }, [allDocuments, doc]);
+  }, [doc.conselheiros_providencia_nomes, doc.medidas_detalhadas]);
 
-  const isConselheiro = currentUser.perfil === 'CONSELHEIRO' || (currentUser.perfil === 'SUPLENTE' && currentUser.substituicao_ativa);
-  const isReferencia = doc.conselheiro_referencia_id === currentUser.id;
-  const isProvidencia = doc.conselheiro_providencia_id === currentUser.id;
+  // DIRETRIZ 81: Lógica de Identificação de Mudanças
+  const diffs = useMemo(() => {
+    if (!doc.snapshot_validado) return { direito: false, agente: false, medida: false, justificativa: false };
+    
+    const prev = doc.snapshot_validado;
+    
+    const direitoChanged = JSON.stringify(prev.violacoesSipia) !== JSON.stringify(doc.violacoesSipia);
+    const agenteChanged = JSON.stringify(prev.agentesVioladores) !== JSON.stringify(doc.agentesVioladores);
+    
+    // Comparação de medidas (Art 101/129)
+    const prevMedNames = prev.medidas_detalhadas.map(m => m.artigo_inciso).sort().join(',');
+    const currentMedNames = (doc.medidas_detalhadas || []).map(m => m.artigo_inciso).sort().join(',');
+    const medidaChanged = prevMedNames !== currentMedNames;
 
-  const escalaDia = useMemo(() => getEffectiveEscala(doc.data_recebimento || new Date().toISOString().split('T')[0]), [doc.data_recebimento]);
-  const isParticipanteDia = escalaDia.some(n => n.toUpperCase() === currentUser.nome.toUpperCase());
-  
-  const alreadySigned = doc.medidas_detalhadas?.[0]?.confirmacoes.some(c => c.usuario_id === currentUser.id) || false;
-  const needsValidation = doc.status.includes('AGUARDANDO_VALIDACAO') && isParticipanteDia && !alreadySigned;
+    const justificativaChanged = prev.observacao_monitoramento !== doc.observacao_monitoramento || 
+                           JSON.stringify(prev.atribuicoes_136) !== JSON.stringify(doc.atribuicoes_136);
 
-  const isDirectActionMode = isConselheiro && (isReferencia || (isParticipanteDia && !alreadySigned));
+    return { 
+      direito: direitoChanged, 
+      agente: agenteChanged, 
+      medida: medidaChanged, 
+      justificativa: justificativaChanged,
+      any: direitoChanged || agenteChanged || medidaChanged || justificativaChanged
+    };
+  }, [doc.snapshot_validado, doc.violacoesSipia, doc.agentesVioladores, doc.medidas_detalhadas, doc.atribuicoes_136, doc.observacao_monitoramento]);
 
-  const isAdminProfile = currentUser.nome === 'EDSON' || currentUser.nome === 'FATIMA' || currentUser.nome === 'LUIZ';
-
-  const isCompleteForFinalize = useMemo(() => {
-    if (isAdminProfile) return true; 
-    if (isImprocedente) return justificativaImprocedencia.trim().length >= 5 && tempAgentes.length > 0;
-    return (
-      tempViolacoes.length > 0 &&
-      tempAgentes.length > 0 &&
-      selectedMedidas101.length > 0 &&
-      selectedAtribuicoes136.length > 0
-    );
-  }, [isImprocedente, justificativaImprocedencia, tempViolacoes, tempAgentes, selectedMedidas101, selectedAtribuicoes136, isAdminProfile]);
-
-  const hasMeritoForFinalize = useMemo(() => {
-    if (isAdminProfile) return true;
-    return (tempViolacoes.length > 0 || isImprocedente) && tempAgentes.length > 0;
-  }, [tempViolacoes, isImprocedente, tempAgentes, isAdminProfile]);
-
-  useEffect(() => {
-    if (forceEdit && isDirectActionMode && tempViolacoes.length === 0 && !isImprocedente) {
-      setShowSipiaModal(true);
-    }
-  }, [forceEdit, isDirectActionMode]);
-
-  const toggleSipia = (fundamental: string, grupo: string, especifico: string) => {
-    if (tempViolacoes.some(v => v.especifico === especifico)) {
-      setTempViolacoes(tempViolacoes.filter(v => v.especifico !== especifico));
-    } else {
-      setTempViolacoes([...tempViolacoes, { fundamental, grupo, especifico }]);
-    }
+  const toggleSipia = (fund: string, grp: string, item: string) => {
+    if (!canEditTechnicalFields) return;
+    setTempViolacoes(prev => prev.some(v => v.especifico === item) ? prev.filter(v => v.especifico !== item) : [...prev, { fundamental: fund, grupo: grp, especifico: item }]);
   };
 
-  const toggleAgente = (categoria: string, principal: string) => {
-    if (tempAgentes.some(a => a.principal === principal)) {
-      setTempAgentes(tempAgentes.filter(a => a.principal !== principal));
-    } else {
-      setTempAgentes([...tempAgentes, { categoria, principal, tipo: 'PRINCIPAL' }]);
-    }
-  };
+  const handleSave = (finalize: boolean) => {
+    if (!canEditTechnicalFields) return;
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    
+    const mySignature = { usuario_id: currentUser.id, usuario_nome: `${currentUser.nome} - ${formattedDate}`, data_hora: now.toISOString() };
+    
+    // DIRETRIZ 80.2: Reset de Status das assinaturas
+    const hasExistingValidations = validationTracker.some(v => v.validated && v.name !== currentUser.nome.toUpperCase());
+    const resetNames = validationTracker.filter(v => v.validated && v.name !== currentUser.nome.toUpperCase()).map(v => v.name).join(' e ');
 
-  const toggleMedida101 = (id: string) => {
-    setSelectedMedidas101(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
-  };
-
-  const toggleMedida129 = (id: string) => {
-    setSelectedMedidas129(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
-  };
-
-  const toggleAtribuicao136 = (id: string) => {
-    if (id === 'III-a' && !selectedAtribuicoes136.includes(id)) {
-      setShowRequisicaoModal(true);
-    }
-    setSelectedAtribuicoes136(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
-  };
-
-  const handleToggleImprocedencia = () => {
-    const newVal = !isImprocedente;
-    setIsImprocedente(newVal);
-    if (newVal) {
-      setTempViolacoes([]);
-      setTempAgentes([]);
-      setSelectedMedidas101([]);
-      setSelectedMedidas129([]);
-      setSelectedAtribuicoes136([]);
-    }
-  };
-
-  const saveProvidencias = (forceFinalize: boolean = false) => {
-    if (forceFinalize) {
-      if (!isCompleteForFinalize) {
-        if (!hasMeritoForFinalize) {
-          alert("ERRO DE FINALIZAÇÃO: Selecione obrigatoriamente o Direito e o Agente Violador.");
-          return;
-        }
-        alert("DIRETRIZ SIMCT: Preencha Direito, Agente, Medida e Atribuição para poder FINALIZAR.");
-        return;
-      }
-    }
-
-    const hadValidations = (doc.medidas_detalhadas?.[0]?.confirmacoes.length || 0) > 1;
-    if (hadValidations && forceFinalize) {
-      if (!window.confirm("Atenção: Ao alterar estes campos, as validações anteriores serão removidas.")) return;
-    }
+    // DIRETRIZ 81: Criar Snapshot antes de salvar a nova versão se ainda não houver um snapshot ou se for uma nova alteração pós-validação
+    const newSnapshot: SnapshotComparativo = {
+      violacoesSipia: doc.violacoesSipia,
+      agentesVioladores: doc.agentesVioladores,
+      medidas_detalhadas: doc.medidas_detalhadas || [],
+      atribuicoes_136: doc.atribuicoes_136 || [],
+      observacao_monitoramento: doc.observacao_monitoramento || ''
+    };
 
     const combinedMedidas: MedidaAplicada[] = [
-      ...selectedMedidas101.map(id => ({
-        id: `med-101-${id}-${Date.now()}`,
-        artigo_inciso: `Art. 101, ${id}`,
-        texto: MEDIDAS_101_ECA.find(m => m.id === id)?.label || '',
-        autor_id: currentUser.id,
-        autor_nome: currentUser.nome,
-        data_launch: new Date().toISOString(),
-        data_lancamento: new Date().toISOString(),
-        conselheiros_requeridos: escalaDia.map(n => n.toUpperCase()),
-        confirmacoes: [{ usuario_id: currentUser.id, usuario_nome: currentUser.nome, data_hora: new Date().toISOString() }]
+      ...selectedMedidas101.map(id => ({ 
+        id: `med-101-${id}-${Date.now()}`, 
+        artigo_inciso: `Art. 101, ${id}`, 
+        texto: MEDIDAS_101_ECA.find(m => m.id === id)?.label || '', 
+        autor_id: currentUser.id, autor_nome: currentUser.nome, 
+        data_lancamento: now.toISOString(), 
+        conselheiros_requeridos: doc.conselheiros_providencia_nomes, 
+        confirmacoes: [mySignature] 
       })),
-      ...selectedMedidas129.map(id => ({
-        id: `med-129-${id}-${Date.now()}`,
-        artigo_inciso: `Art. 129, ${id}`,
-        texto: MEDIDAS_129_ECA.find(m => m.id === id)?.label || '',
-        autor_id: currentUser.id,
-        autor_nome: currentUser.nome,
-        data_launch: new Date().toISOString(),
-        data_lancamento: new Date().toISOString(),
-        conselheiros_requeridos: escalaDia.map(n => n.toUpperCase()),
-        confirmacoes: [{ usuario_id: currentUser.id, usuario_nome: currentUser.nome, data_hora: new Date().toISOString() }]
+      ...selectedMedidas129.map(id => ({ 
+        id: `med-129-${id}-${Date.now()}`, 
+        artigo_inciso: `Art. 129, ${id}`, 
+        texto: MEDIDAS_129_ECA.find(m => m.id === id)?.label || '', 
+        autor_id: currentUser.id, autor_nome: currentUser.nome, 
+        data_lancamento: now.toISOString(), 
+        conselheiros_requeridos: doc.conselheiros_providencia_nomes, 
+        confirmacoes: [mySignature] 
       }))
     ];
 
-    let updatedMonitoring = doc.monitoramento || { servicos: [], prazoEsperado: '', concluido: false, requisicoes: [] };
-    if (isReqAreaSelected && newRequisicao.equipamento) {
-      const dataFinal = new Date();
-      dataFinal.setDate(dataFinal.getDate() + newRequisicao.prazoDias);
-      const reqIndividual: RequisicaoServico = {
-        id: `req-${Date.now()}`,
-        area: newRequisicao.area,
-        servico: newRequisicao.equipamento,
-        prazoDias: newRequisicao.prazoDias,
-        dataFinal: dataFinal.toISOString()
-      };
-      updatedMonitoring = { ...updatedMonitoring, requisicoes: [...(updatedMonitoring.requisicoes || []), reqIndividual] };
-      onAddLog(doc.id, `REQUISIÇÃO: Serviço registrado para ${newRequisicao.equipamento}.`);
-    }
-
-    let finalStatus: DocumentStatus[] = doc.status.filter(s => !SITUACOES_PRONTUARIO.some(sp => sp.id === s));
-    if (forceFinalize) {
-      finalStatus.push('AGUARDANDO_VALIDACAO');
-      onAddLog(doc.id, `FINALIZAÇÃO: Decisão técnica finalizada por ${currentUser.nome}.`);
-    } else {
-      finalStatus.push(tempStatus);
-      onAddLog(doc.id, `ATUALIZAÇÃO: Prontuário atualizado por ${currentUser.nome}.`);
-    }
-
-    const incisos101Str = selectedMedidas101.join(', ');
-    const incisos129Str = selectedMedidas129.join(', ');
-    const incisos136Str = selectedAtribuicoes136.join(', ');
-    let fundamentacao = isImprocedente ? `PROCESSO DECLARADO IMPROCEDENTE: ${justificativaImprocedencia.toUpperCase()}` : `Diante dos fatos, aplico as medidas de proteção à criança/adolescente (Art. 101, incisos ${incisos101Str}) e, cumulativamente, as medidas aos pais/responsável conforme Art. 129, incisos ${incisos129Str} da Lei 8.069/90.\n\nNo uso das atribuições conferidas pelo Art. 136, incisos ${incisos136Str} da Lei 8.069/90, decido pela aplicação das medidas supra mencionadas.`;
-
-    onUpdateDocument(doc.id, {
-      violacoesSipia: tempViolacoes,
-      agentesVioladores: tempAgentes,
+    onUpdateDocument(doc.id, { 
+      violacoesSipia: tempViolacoes, 
+      agentesVioladores: tempAgentes, 
       medidas_detalhadas: combinedMedidas,
       atribuicoes_136: selectedAtribuicoes136,
-      observacoes_iniciais: fundamentacao,
-      status: finalStatus,
+      status: finalize ? ['AGUARDANDO_VALIDACAO'] : ['EM_PREENCHIMENTO'],
       is_improcedente: isImprocedente,
       justificativa_improcedencia: justificativaImprocedencia,
-      complemento_medidas: complementoMedidas,
-      monitoramento: updatedMonitoring
+      observacao_monitoramento: obsMonitoramento,
+      snapshot_validado: hasExistingValidations ? newSnapshot : doc.snapshot_validado
     });
-
-    if (forceFinalize) onBack();
-    else alert("Prontuário salvo como rascunho no SIMCT.");
+    
+    if (hasExistingValidations) {
+      onAddLog(doc.id, `${currentUser.nome} (Imediata) alterou o mérito. Assinaturas de ${resetNames} resetadas.`, 'VALIDAÇÃO');
+      alert(`🔄 REVALIDAÇÃO NECESSÁRIA: Alterações salvas. As validações dos colegas foram resetadas para revisão.`);
+    } else {
+      onAddLog(doc.id, `${currentUser.nome} (Imediata) atualizou prontuário técnico.`, 'VALIDAÇÃO');
+    }
   };
 
-  const handleValidarColegiada = () => {
-    if (!doc.medidas_detalhadas || doc.medidas_detalhadas.length === 0) return;
-    const timestamp = new Date().toISOString();
-    const firstMedida = doc.medidas_detalhadas[0];
-    const newConfirmations = [...firstMedida.confirmacoes, { usuario_id: currentUser.id, usuario_nome: currentUser.nome, data_hora: timestamp }];
-    const updatedMedidas = doc.medidas_detalhadas.map((m, idx) => idx === 0 ? { ...m, confirmacoes: newConfirmations } : m);
-    let newStatus = [...doc.status];
-    if (newConfirmations.length >= 3) {
-      newStatus = newStatus.filter(s => s !== 'AGUARDANDO_VALIDACAO');
-      if (!newStatus.includes('OFICIALIZADO')) newStatus.push('OFICIALIZADO');
+  const handleValidate = () => {
+    const now = new Date();
+    const formatted = `${currentUser.nome} - ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+    const updated = (doc.medidas_detalhadas || []).map(m => ({
+      ...m,
+      confirmacoes: [...m.confirmacoes, { usuario_id: currentUser.id, usuario_nome: formatted, data_hora: now.toISOString() }]
+    }));
+    
+    const validatedOthers = validationTracker.filter(v => v.validated && v.name !== currentUser.nome.toUpperCase()).length;
+    let nextStatus = [...doc.status];
+    let fieldsToUpdate: Partial<Documento> = { medidas_detalhadas: updated };
+
+    // Se todos validaram, removemos os indicadores de mudança
+    if (validatedOthers === 1) { // Sou o 2º a validar (considerando que a Imediata já assinou ao salvar)
+       nextStatus = nextStatus.filter(s => s !== 'AGUARDANDO_VALIDACAO');
+       if (!nextStatus.includes('OFICIALIZADO')) nextStatus.push('OFICIALIZADO');
+       fieldsToUpdate.snapshot_validado = undefined; // Limpa os indicadores visuais
     }
-    onUpdateDocument(doc.id, { medidas_detalhadas: updatedMedidas, status: newStatus });
-    onAddLog(doc.id, `VALIDAÇÃO: Documento validado por ${currentUser.nome} no SIMCT.`);
+
+    onUpdateDocument(doc.id, { ...fieldsToUpdate, status: nextStatus });
+    onAddLog(doc.id, `VALIDAÇÃO: ${currentUser.nome} confirmou concordância com o mérito atualizado.`, 'VALIDAÇÃO');
   };
 
   return (
-    <div className="max-w-6xl mx-auto pb-20 animate-in fade-in duration-500">
-      {hasExpiredRequisicao && (
-        <div className="mb-8 p-6 bg-red-600 text-white rounded-[2rem] shadow-2xl flex items-center justify-between border-4 border-red-500 animate-pulse">
-          <div className="flex items-center gap-4">
-            <AlertTriangle className="w-10 h-10" />
-            <div>
-              <h4 className="text-[16px] font-black uppercase tracking-widest">PRAZO DE REQUISIÇÃO EXPIRADO</h4>
-              <p className="text-[11px] font-bold opacity-90 uppercase">PROVIDENCIAR ART. 136, III, 'b' (Representação Judiciária)</p>
+    <div className="max-w-6xl mx-auto pb-20 animate-in fade-in flex flex-col lg:flex-row gap-8">
+      <div className="flex-1 space-y-8">
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
+          <header className="p-8 bg-[#111827] text-white flex items-center justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-full bg-blue-600/10 -skew-x-12 translate-x-32"></div>
+            <button onClick={onBack} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all z-10"><ArrowLeft className="w-6 h-6" /></button>
+            <div className="text-center z-10"><h2 className="text-[20px] font-black uppercase tracking-tight">{doc.crianca_nome}</h2><p className="text-[10px] opacity-60 uppercase font-bold tracking-widest mt-1">SIMCT #{doc.id}</p></div>
+            <div className="w-12 h-12"></div>
+          </header>
+
+          <div className="p-10 space-y-8">
+            <div className="flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-3">
+                 <Scale className="w-6 h-6 text-blue-600" />
+                 <div>
+                    <h3 className="text-[15px] font-black uppercase text-slate-800 tracking-tight">Análise de Mérito Técnico</h3>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Soberania do Colegiado (Diretrizes 80/81)</p>
+                 </div>
+              </div>
+              {canEditTechnicalFields && (
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                   <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase rounded-full border border-emerald-200 shadow-sm">Edição Liberada</span>
+                </div>
+              )}
+            </div>
+
+            {diffs.any && !isImediataResponsavel && (
+              <div className="p-6 bg-yellow-50 border-2 border-yellow-200 rounded-3xl flex items-start gap-4 animate-in slide-in-from-top duration-500">
+                 <div className="p-3 bg-yellow-500 rounded-2xl shadow-lg"><Zap className="w-6 h-6 text-white animate-bounce" /></div>
+                 <div className="space-y-1">
+                    <h4 className="text-[14px] font-black text-yellow-900 uppercase">Atenção: Mérito Alterado</h4>
+                    <p className="text-[11px] text-yellow-800 font-bold uppercase leading-tight">O Conselheiro de Imediata realizou modificações técnicas. Revise os campos destacados com a borda pulsante e o ícone ⚡ antes de revalidar.</p>
+                 </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <AccordionSection 
+                id="direito" title="Direito Violado" color="bg-blue-600" active={activeSection} onToggle={setActiveSection}
+                saved={tempViolacoes.length > 0} 
+                changed={diffs.direito}
+                previousValue={doc.snapshot_validado?.violacoesSipia.map(v => v.especifico).join(', ')}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-2 scrollbar-thin">
+                  {Object.entries(SIPIA_HIERARCHY).map(([fund, grps]) => (
+                    <div key={fund} className="space-y-2 mb-6 last:mb-0">
+                      <div className="text-[10px] font-black text-blue-800 uppercase border-b border-blue-100 pb-1">{fund}</div>
+                      {Object.entries(grps).map(([grp, items]) => (
+                        <div key={grp} className="pl-2 mb-2">
+                          <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">{grp}</div>
+                          {items.map(item => (
+                            <div key={item} onClick={() => toggleSipia(fund, grp, item)} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-[10px] uppercase font-bold transition-all ${tempViolacoes.some(v => v.especifico === item) ? 'bg-blue-600 text-white shadow-md' : 'hover:bg-slate-50 text-slate-600'}`}>
+                              {tempViolacoes.some(v => v.especifico === item) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 opacity-20" />} {item}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </AccordionSection>
+
+              <AccordionSection 
+                id="agente" title="Agente Violador" color="bg-orange-500" active={activeSection} onToggle={setActiveSection}
+                saved={tempAgentes.length > 0}
+                changed={diffs.agente}
+                previousValue={doc.snapshot_validado?.agentesVioladores.map(a => a.principal).join(', ')}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-2">
+                  {Object.entries(AGENTES_VIOLADORES_ESTRUTURA).map(([cat, info]) => (
+                    <div key={cat} className="space-y-2">
+                      <div className="text-[10px] font-black text-orange-800 uppercase border-b border-orange-100 pb-1">{cat}</div>
+                      {info.options.map(opt => (
+                        <div key={opt} onClick={() => canEditTechnicalFields && setTempAgentes(prev => prev.some(a => a.principal === opt) ? prev.filter(a => a.principal !== opt) : [...prev, {categoria: cat, principal: opt, tipo: 'PRINCIPAL'}])} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-[10px] uppercase font-bold transition-all ${tempAgentes.some(a => a.principal === opt) ? 'bg-orange-500 text-white shadow-md' : 'hover:bg-slate-50 text-slate-600'}`}>
+                          {tempAgentes.some(a => a.principal === opt) ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 opacity-20" />} {opt}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </AccordionSection>
+
+              <AccordionSection 
+                id="medidas" title="Medidas de Proteção" color="bg-emerald-600" active={activeSection} onToggle={setActiveSection}
+                saved={(selectedMedidas101.length + selectedMedidas129.length) > 0}
+                changed={diffs.medida}
+                previousValue={doc.snapshot_validado?.medidas_detalhadas.map(m => m.artigo_inciso).join(', ')}>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                     <div className="text-[10px] font-black text-emerald-800 uppercase border-b border-emerald-100 pb-1">Art. 101 - Criança/Adolescente</div>
+                     {MEDIDAS_101_ECA.map(m => (
+                       <div key={m.id} onClick={() => canEditTechnicalFields && setSelectedMedidas101(p => p.includes(m.id) ? p.filter(x => x !== m.id) : [...p, m.id])} className={`flex gap-3 p-3 rounded-xl cursor-pointer hover:bg-emerald-50 text-[10px] uppercase font-bold transition-all ${selectedMedidas101.includes(m.id) ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-600'}`}>
+                          {selectedMedidas101.includes(m.id) ? <CheckSquare className="w-4 h-4 shrink-0" /> : <Square className="w-4 h-4 opacity-20 shrink-0" />} {m.label}
+                       </div>
+                     ))}
+                  </div>
+                  <div className="space-y-2">
+                     <div className="text-[10px] font-black text-indigo-800 uppercase border-b border-indigo-100 pb-1">Art. 129 - Pais / Responsável</div>
+                     {MEDIDAS_129_ECA.map(m => (
+                       <div key={m.id} onClick={() => canEditTechnicalFields && setSelectedMedidas129(p => p.includes(m.id) ? p.filter(x => x !== m.id) : [...p, m.id])} className={`flex gap-3 p-3 rounded-xl cursor-pointer hover:bg-indigo-50 text-[10px] uppercase font-bold transition-all ${selectedMedidas129.includes(m.id) ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600'}`}>
+                          {selectedMedidas129.includes(m.id) ? <CheckSquare className="w-4 h-4 shrink-0" /> : <Square className="w-4 h-4 opacity-20 shrink-0" />} {m.label}
+                       </div>
+                     ))}
+                  </div>
+                </div>
+              </AccordionSection>
+
+              <AccordionSection 
+                id="atribuicoes" title="Justificativa Técnica" color="bg-slate-700" active={activeSection} onToggle={setActiveSection}
+                saved={obsMonitoramento.trim().length > 0}
+                changed={diffs.justificativa}
+                previousValue={doc.snapshot_validado?.observacao_monitoramento}>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     {ATRIBUICOES_136_ECA.map(a => (
+                       <div key={a.id} onClick={() => canEditTechnicalFields && setSelectedAtribuicoes136(p => p.includes(a.id) ? p.filter(x => x !== a.id) : [...p, a.id])} className={`flex gap-2 p-2 rounded-lg cursor-pointer text-[9px] uppercase font-bold transition-all ${selectedAtribuicoes136.includes(a.id) ? 'bg-slate-800 text-white shadow-md' : 'bg-slate-50 text-slate-500'}`}>
+                          {selectedAtribuicoes136.includes(a.id) ? <CheckSquare className="w-3.5 h-3.5" /> : <Square className="w-3.5 h-3.5 opacity-20" />} {a.label}
+                       </div>
+                     ))}
+                  </div>
+                  <textarea 
+                    className={`w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl text-[13px] font-medium uppercase outline-none focus:border-blue-600 transition-all min-h-[150px] ${!canEditTechnicalFields ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                    placeholder="FUNDAMENTAÇÃO TÉCNICA DO CASO..."
+                    value={obsMonitoramento}
+                    disabled={!canEditTechnicalFields}
+                    onChange={e => setObsMonitoramento(e.target.value.toUpperCase())}
+                  />
+                </div>
+              </AccordionSection>
+            </div>
+
+            {canEditTechnicalFields && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                <button onClick={() => handleSave(false)} className="py-6 bg-slate-600 text-white rounded-3xl font-black uppercase text-[12px] shadow-xl hover:bg-slate-700 transition-all flex items-center justify-center gap-3 active:scale-95"><Save className="w-5 h-5" /> [Salvar Rascunho]</button>
+                <button onClick={() => handleSave(true)} className="py-6 bg-emerald-600 text-white rounded-3xl font-black uppercase text-[12px] shadow-xl hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 active:scale-95 animate-in zoom-in-95 group">
+                  <Edit2 className="w-5 h-5 group-hover:rotate-12 transition-transform" /> [Salvar Alterações de Mérito]
+                </button>
+              </div>
+            )}
+
+            {/* RASTREAMENTO DE VALIDAÇÃO NO RODAPÉ */}
+            <div className="mt-12 pt-10 border-t bg-slate-50/50 rounded-[3rem] p-10 border border-slate-100">
+               <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                     <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm text-slate-400"><Users2 className="w-6 h-6" /></div>
+                     <div>
+                        <h4 className="text-[16px] font-black text-slate-800 uppercase tracking-tight">Soberania do Colegiado de Plantão</h4>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Assinaturas e Revalidação Automática</p>
+                     </div>
+                  </div>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {validationTracker.map((status, idx) => {
+                    const isMe = currentUser.nome.toUpperCase().includes(status.name.toUpperCase());
+                    const needsAction = isMe && !status.validated && (doc.status.includes('AGUARDANDO_VALIDACAO') || doc.status.includes('OFICIALIZADO'));
+
+                    return (
+                      <div key={idx} className={`p-8 rounded-[2rem] border-4 flex flex-col items-center gap-4 transition-all relative overflow-hidden ${status.validated ? 'bg-white border-emerald-500 shadow-xl' : 'bg-red-50 border-red-300 animate-in fade-in duration-700'}`}>
+                         {status.validated && <div className="absolute top-4 right-4 animate-in zoom-in"><CheckCircle2 className="w-7 h-7 text-emerald-500" /></div>}
+                         <div className={`w-14 h-14 rounded-full flex items-center justify-center font-black text-[18px] shadow-inner ${status.validated ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 animate-pulse'}`}>
+                            {status.name.substring(0,2)}
+                         </div>
+                         <div className="text-center space-y-2">
+                            <span className={`text-[13px] font-black uppercase ${status.validated ? 'text-slate-900' : 'text-red-700'}`}>{status.name}</span>
+                            <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase border-2 ${status.validated ? 'bg-emerald-500 text-white border-emerald-400 shadow-sm' : 'bg-white text-red-600 border-red-200'}`}>
+                               {status.validated ? `VALIDADO EM ${status.timestamp}` : (
+                                  <span className="flex items-center gap-1"><RotateCcw className="w-2.5 h-2.5" /> REVALIDAÇÃO NECESSÁRIA</span>
+                               )}
+                            </div>
+                         </div>
+                         {needsAction && (
+                           <button 
+                             onClick={handleValidate} 
+                             className="w-full mt-2 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase shadow-2xl hover:bg-emerald-700 transition-all active:scale-95 animate-bounce ring-4 ring-emerald-500/10 flex items-center justify-center gap-2"
+                           >
+                             {diffs.any ? <><CheckCircle className="w-4 h-4" /> [✅ VI E CONCORDO COM A ALTERAÇÃO]</> : <><Scale className="w-4 h-4" /> [CONFIRMAR MINHA VALIDAÇÃO]</>}
+                           </button>
+                         )}
+                      </div>
+                    );
+                  })}
+               </div>
             </div>
           </div>
-          <ShieldAlert className="w-12 h-12 opacity-30" />
-        </div>
-      )}
-
-      {isDirectActionMode && (
-        <div className="mb-10 p-10 bg-[#1e293b] text-white rounded-[3rem] shadow-2xl flex flex-col gap-10 border-b-8 border-[#0f172a] animate-in slide-in-from-top-4">
-           <header className="flex items-center justify-between border-b border-white/10 pb-6">
-             <div className="flex items-center gap-5">
-               <div className="p-4 bg-blue-600 rounded-[1.5rem] shadow-xl shadow-blue-500/20"><ShieldAlert className="w-10 h-10 text-white" /></div>
-               <div><h3 className="text-[22px] font-black uppercase tracking-tight">Protocolo Decisório SIMCT</h3><p className="text-[11px] font-bold opacity-60 uppercase tracking-[0.3em]">Hortolândia • Gestão Municipal</p></div>
-             </div>
-             <button onClick={handleToggleImprocedencia} className={`px-8 py-4 rounded-2xl text-[12px] font-black uppercase tracking-widest flex items-center gap-3 transition-all shadow-lg ${isImprocedente ? 'bg-red-600 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`}><Ban className="w-5 h-5" /> Improcedente</button>
-           </header>
-
-           {needsValidation && (
-             <button onClick={handleValidarColegiada} className="w-full py-10 bg-emerald-600 text-white rounded-[2.5rem] font-black uppercase text-[18px] tracking-[0.2em] shadow-2xl hover:bg-emerald-500 transition-all flex items-center justify-center gap-6 animate-pulse">
-                <ShieldCheck className="w-10 h-10" /> [CONFIRMAR MINHA VALIDAÇÃO NO COLEGIADO]
-             </button>
-           )}
-
-           {!isImprocedente ? (
-             <div className="space-y-12">
-                <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-4">
-                   <div className="flex items-center gap-3"><ListFilter className="w-5 h-5 text-blue-400" /><label className="text-[11px] font-black text-white/60 uppercase tracking-[0.2em]">Situação Prontuário SIMCT</label></div>
-                   <select className="w-full p-5 bg-slate-900 border border-white/10 rounded-2xl text-[13px] font-black uppercase text-white outline-none focus:border-blue-500 transition-all cursor-pointer" value={tempStatus} onChange={e => setTempStatus(e.target.value as DocumentStatus)}>{SITUACOES_PRONTUARIO.map(sit => <option key={sit.id} value={sit.id}>{sit.label}</option>)}</select>
-                </div>
-
-                {needsImmediateMP && <div className="p-8 bg-red-600 border border-red-500 rounded-[2rem] flex items-center gap-6 shadow-2xl animate-bounce"><Megaphone className="w-12 h-12 text-white shrink-0" /><div><h4 className="text-[16px] font-black uppercase text-white tracking-widest">Notificação Incontinenti MP</h4><p className="text-[12px] font-bold text-red-100 uppercase mt-1">Acolhimento detectado (Art. 136 ECA).</p></div></div>}
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                   <button onClick={() => setShowSipiaModal(true)} className={`p-8 bg-blue-500/10 border rounded-[2.5rem] hover:bg-blue-500/20 transition-all flex items-center gap-6 group ${tempViolacoes.length === 0 ? 'border-blue-500/30' : 'border-blue-500/50 shadow-blue-500/10'}`}><Scale className={`w-12 h-12 transition-transform group-hover:scale-110 ${tempViolacoes.length === 0 ? 'text-blue-300 opacity-50' : 'text-blue-400'}`} /><div className="text-left"><span className={`text-[10px] font-black uppercase tracking-widest block ${tempViolacoes.length === 0 ? 'text-blue-300 opacity-50' : 'text-blue-400'}`}>Violações SIPIA</span><span className="text-[16px] font-black uppercase">{tempViolacoes.length} Selecionadas</span></div></button>
-                   <button onClick={() => setShowAgenteModal(true)} className={`p-8 bg-amber-500/10 border rounded-[2.5rem] hover:bg-amber-500/20 transition-all flex items-center gap-6 group ${tempAgentes.length === 0 ? 'border-amber-500/30' : 'border-amber-500/50 shadow-amber-500/10'}`}><Users2 className={`w-12 h-12 transition-transform group-hover:scale-110 ${tempAgentes.length === 0 ? 'text-amber-300 opacity-50' : 'text-amber-400'}`} /><div className="text-left"><span className={`text-[10px] font-black uppercase tracking-widest block ${tempAgentes.length === 0 ? 'text-amber-300 opacity-50' : 'text-amber-400'}`}>Agentes Violadores</span><span className="text-[16px] font-black uppercase">{tempAgentes.length} Selecionados</span></div></button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                   <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6"><h4 className="text-[13px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-3"><Baby className="w-5 h-5" /> Medidas Art. 101</h4><div className="space-y-3 max-h-[300px] overflow-y-auto pr-4 scrollbar-thin">{MEDIDAS_101_ECA.map(med => <div key={med.id} onClick={() => toggleMedida101(med.id)} className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-4 ${selectedMedidas101.includes(med.id) ? 'bg-emerald-600/20 border-emerald-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>{selectedMedidas101.includes(med.id) ? <CheckSquare className="w-5 h-5 text-emerald-400 shrink-0" /> : <Square className="w-5 h-5 text-white/20 shrink-0" />}<span className={`text-[11px] font-bold uppercase leading-tight ${selectedMedidas101.includes(med.id) ? 'text-emerald-50' : 'text-white/60'}`}>{med.label}</span></div>)}</div></div>
-                   <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6"><h4 className="text-[13px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-3"><HeartHandshake className="w-5 h-5" /> Medidas Art. 129</h4><div className="space-y-3 max-h-[300px] overflow-y-auto pr-4 scrollbar-thin">{MEDIDAS_129_ECA.map(med => <div key={med.id} onClick={() => toggleMedida129(med.id)} className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-4 ${selectedMedidas129.includes(med.id) ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>{selectedMedidas129.includes(med.id) ? <CheckSquare className="w-5 h-5 text-indigo-400 shrink-0" /> : <Square className="w-5 h-5 text-white/20 shrink-0" />}<span className={`text-[11px] font-bold uppercase leading-tight ${selectedMedidas129.includes(med.id) ? 'text-indigo-50' : 'text-white/60'}`}>{med.label}</span></div>)}</div></div>
-                </div>
-
-                <div className="p-10 bg-white/5 border border-blue-500/20 rounded-[3rem] space-y-8"><div className="flex items-center justify-between border-b border-white/10 pb-4"><h4 className="text-[15px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-4"><BookOpen className="w-6 h-6" /> Atribuições Art. 136</h4></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-6 scrollbar-thin">{ATRIBUICOES_136_ECA.map(atr => <div key={atr.id} onClick={() => toggleAtribuicao136(atr.id)} className={`p-5 rounded-[2rem] border transition-all cursor-pointer flex items-start gap-5 ${selectedAtribuicoes136.includes(atr.id) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'}`}>{selectedAtribuicoes136.includes(atr.id) ? <CheckSquare className="w-6 h-6 text-blue-400 shrink-0" /> : <Square className="w-6 h-6 text-white/20 shrink-0" />}<div className="space-y-1"><span className={`text-[12px] font-black uppercase tracking-tight block ${selectedAtribuicoes136.includes(atr.id) ? 'text-blue-50' : 'text-white/60'}`}>{atr.id}</span><p className={`text-[11px] font-bold leading-relaxed uppercase ${selectedAtribuicoes136.includes(atr.id) ? 'text-blue-100' : 'text-white/40'}`}>{atr.label}</p></div></div>)}</div></div>
-
-                {showRequisicaoModal && (
-                  <div className="p-10 bg-blue-600/20 border border-blue-500 rounded-[3rem] space-y-8 animate-in slide-in-from-top-4">
-                    <div className="flex items-center justify-between"><h4 className="text-[16px] font-black text-white uppercase tracking-widest flex items-center gap-4"><Building2 className="w-7 h-7" /> Requisição SIMCT Hortolândia</h4><button onClick={() => setShowRequisicaoModal(false)} className="p-2 hover:bg-white/10 rounded-full"><X className="w-6 h-6" /></button></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <div className="space-y-2"><label className="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1">Área Serviço</label><select className="w-full p-4 bg-slate-900 border border-white/10 rounded-2xl text-[12px] font-black uppercase outline-none focus:border-white transition-all" value={newRequisicao.area} onChange={e => setNewRequisicao({...newRequisicao, area: e.target.value, subGrupo: '', equipamento: ''})}><option value="">Selecione...</option>{Object.keys(REDE_HORTOLANDIA).map(area => <option key={area} value={area}>{area}</option>)}</select></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1">Sub-Grupo</label><select className="w-full p-4 bg-slate-900 border border-white/10 rounded-2xl text-[12px] font-black uppercase outline-none focus:border-white transition-all" disabled={!newRequisicao.area} value={newRequisicao.subGrupo} onChange={e => setNewRequisicao({...newRequisicao, subGrupo: e.target.value, equipamento: ''})}><option value="">Selecione...</option>{newRequisicao.area && Object.keys((REDE_HORTOLANDIA as any)[newRequisicao.area]).map(sub => <option key={sub} value={sub}>{sub}</option>)}</select></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1">Equipamento Mapeado</label><select className="w-full p-4 bg-slate-900 border border-white/10 rounded-2xl text-[12px] font-black uppercase outline-none focus:border-white transition-all" disabled={!newRequisicao.subGrupo} value={newRequisicao.equipamento} onChange={e => setNewRequisicao({...newRequisicao, equipamento: e.target.value})}><option value="">Selecione...</option>{newRequisicao.subGrupo && (REDE_HORTOLANDIA as any)[newRequisicao.area][newRequisicao.subGrupo].map((eq: string) => <option key={eq} value={eq}>{eq}</option>)}</select></div>
-                      <div className="space-y-2"><label className="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1">Prazo (Dias)</label><input type="number" className="w-full p-4 bg-slate-900 border border-white/10 rounded-2xl text-[12px] font-black outline-none" value={newRequisicao.prazoDias} onChange={e => setNewRequisicao({...newRequisicao, prazoDias: parseInt(e.target.value)})} /></div>
-                    </div>
-                    <button onClick={() => setShowRequisicaoModal(false)} className="w-full py-5 bg-white text-blue-600 rounded-2xl font-black uppercase text-[12px] tracking-widest shadow-xl hover:scale-[1.02] transition-all">Confirmar Requisição</button>
-                  </div>
-                )}
-
-                <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-4"><label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-2">Considerações Técnicas SIMCT</label><textarea className="w-full p-6 bg-black/20 border border-white/10 rounded-3xl text-[13px] font-bold text-white uppercase outline-none focus:border-blue-500 transition-all min-h-[120px]" placeholder="REGISTRE DETALHES ADICIONAIS DO CASO..." value={complementoMedidas} onChange={e => setComplementoMedidas(e.target.value)} /></div>
-             </div>
-           ) : (
-             <div className="p-8 bg-red-600/10 border border-red-600/30 rounded-[2.5rem] space-y-4 animate-in zoom-in-95"><h4 className="text-[13px] font-black text-red-400 uppercase tracking-widest flex items-center gap-3"><FileWarning className="w-6 h-6" /> Fundamentação de Improcedência SIMCT</h4><textarea className="w-full p-6 bg-black/20 border border-white/10 rounded-3xl text-[13px] font-bold text-white uppercase outline-none focus:border-red-500 transition-all min-h-[200px]" placeholder="MOTIVO TÉCNICO..." value={justificativaImprocedencia} onChange={e => setJustificativaImprocedencia(e.target.value)} /></div>
-           )}
-
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button onClick={() => saveProvidencias(false)} className="py-8 rounded-[2rem] font-black uppercase text-[15px] tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-4 group bg-slate-600 text-white hover:bg-slate-500"><Save className="w-8 h-8 group-hover:animate-pulse" /> [Salvar Prontuário SIMCT]</button>
-              <button onClick={() => saveProvidencias(true)} className={`py-8 rounded-[2rem] font-black uppercase text-[15px] tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-4 group ${isCompleteForFinalize ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-red-500/20 text-red-400 border border-red-500/30 cursor-not-allowed opacity-60'}`}><SendHorizonal className="w-8 h-8 group-hover:translate-x-1" /> [Finalizar e Validar Colegiado]</button>
-           </div>
-        </div>
-      )}
-
-      <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden">
-        <header className="p-8 bg-[#111827] text-white flex items-center justify-between">
-          <div className="flex items-center gap-4"><button onClick={onBack} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"><ArrowLeft className="w-6 h-6" /></button><div><h2 className="text-[20px] font-black uppercase tracking-tight">{doc.crianca_nome}</h2><div className="text-[11px] font-bold opacity-60 uppercase tracking-widest mt-1">SIMCT Protocolo #{doc.id}</div></div></div>
-          <div className="flex items-center gap-3"><button onClick={() => setShowAuditHistory(true)} className="flex items-center gap-2 px-6 py-4 bg-slate-800 text-white border border-white/10 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg hover:bg-slate-700"><ClipboardList className="w-4 h-4 text-blue-400" /> [HISTÓRICO SIMCT]</button><button onClick={() => setShowFamilyHistoryModal(true)} className="flex items-center gap-2 px-6 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg"><History className="w-4 h-4" /> Histórico Familiar ({familyHistory.length})</button></div>
-        </header>
-
-        <div className="p-10 space-y-12">
-          {doc.observacoes_iniciais && (
-            <div className={`p-10 border-l-8 rounded-[2.5rem] animate-in zoom-in-95 ${doc.is_improcedente ? 'bg-red-50 border-red-500' : 'bg-emerald-50 border-emerald-500'}`}>
-               <div className="flex items-center gap-3 mb-6">{doc.is_improcedente ? <FileWarning className="w-8 h-8 text-red-600" /> : <ShieldCheck className="w-8 h-8 text-emerald-600" />}<h4 className="text-[14px] font-black uppercase tracking-widest">Protocolo Técnico SIMCT</h4></div>
-               <div className="text-[16px] font-bold text-slate-800 uppercase leading-relaxed tracking-tight whitespace-pre-wrap">{doc.observacoes_iniciais}</div>
-            </div>
-          )}
         </div>
       </div>
+    </div>
+  );
+};
+
+interface AccordionSectionProps {
+  id: string;
+  title: string;
+  color: string;
+  active: string | null;
+  onToggle: (id: string) => void;
+  saved: boolean;
+  changed?: boolean;
+  previousValue?: string;
+  children: React.ReactNode;
+}
+
+const AccordionSection: React.FC<AccordionSectionProps> = ({ 
+  id, title, color, active, onToggle, saved, changed, previousValue, children 
+}) => {
+  const isOpen = active === id;
+  return (
+    <div className={`border-4 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-all relative ${changed ? 'animate-pulse-yellow border-yellow-400' : 'border-slate-200'}`}>
+      <button onClick={() => onToggle(id)} className={`w-full flex items-center justify-between p-6 transition-all ${isOpen ? `${color} text-white shadow-inner` : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}>
+        <div className="flex items-center gap-4">
+          {isOpen ? <ChevronDown className="w-5 h-5" /> : <Play className={`w-4 h-4 ${saved ? 'text-emerald-500' : 'opacity-40'}`} />}
+          <div className="flex items-center gap-2">
+             <span className="text-[14px] font-black uppercase tracking-widest">{title}</span>
+             {changed && (
+               <div className="tooltip-trigger relative">
+                  <Zap className="w-4 h-4 text-yellow-500 fill-yellow-500 animate-bounce" />
+                  {previousValue && (
+                    <div className="tooltip-content absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 p-4 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase shadow-2xl z-[50] pointer-events-none border border-white/10">
+                       <div className="text-yellow-400 mb-1 flex items-center gap-1"><History className="w-3 h-3" /> Valor Anterior:</div>
+                       <p className="opacity-80 italic">"{previousValue}"</p>
+                    </div>
+                  )}
+               </div>
+             )}
+          </div>
+        </div>
+        {saved && <CheckCircle className={`w-6 h-6 ${isOpen ? 'text-white' : 'text-emerald-500'} animate-in zoom-in`} />}
+      </button>
+      {isOpen && <div className="p-8 bg-white animate-in slide-in-from-top-2 border-t border-slate-50">{children}</div>}
     </div>
   );
 };

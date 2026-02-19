@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Filter, Eye, EyeOff, Clock, UserCheck, Activity, Archive, AlertCircle, AlertTriangle, CheckCircle2, FileText, CalendarDays, X, Trash2, MailWarning, Send, HelpCircle, BellRing, ChevronDown, Check, Zap, Edit2, Users, UserRound, ShieldAlert, ClipboardCheck, ShieldCheck } from 'lucide-react';
+import { Search, Filter, Eye, EyeOff, Clock, UserCheck, Activity, Archive, AlertCircle, AlertTriangle, CheckCircle2, FileText, CalendarDays, X, Trash2, MailWarning, Send, HelpCircle, BellRing, ChevronDown, Check, Zap, Edit2, Users, UserRound, ShieldAlert, ClipboardCheck, ShieldCheck, Scale, RefreshCw, TriangleAlert } from 'lucide-react';
 import { Documento, User as UserType, DocumentStatus } from '../types';
 import { STATUS_LABELS, INITIAL_USERS } from '../constants';
 
@@ -21,6 +21,8 @@ const getStatusStyle = (status: DocumentStatus) => {
     case 'EM_PREENCHIMENTO': return { color: 'bg-slate-400', border: 'border-l-slate-400', icon: <FileText className="w-4 h-4" /> };
     case 'AGUARDANDO_VALIDACAO': return { color: 'bg-[#EF4444]', border: 'border-l-[#EF4444]', icon: <ShieldAlert className="w-4 h-4" /> };
     case 'OFICIALIZADO': return { color: 'bg-emerald-600', border: 'border-l-emerald-600', icon: <ShieldCheck className="w-4 h-4" /> };
+    case 'TIPIFICACAO_INCOMPLETA': return { color: 'bg-red-600', border: 'border-l-red-600', icon: <AlertCircle className="w-4 h-4" /> };
+    case 'AGUARDANDO_ANALISE': return { color: 'bg-slate-400', border: 'border-l-slate-400', icon: <Clock className="w-4 h-4" /> };
     default: return { color: 'bg-[#9CA3AF]', border: 'border-l-[#9CA3AF]', icon: <Clock className="w-4 h-4" /> };
   }
 };
@@ -49,6 +51,33 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, currentUser, onS
     return searchLower ? matchesSearch : matchesStatus;
   });
 
+  const getDeadlineAlerts = (doc: Documento) => {
+    if (!doc.monitoramento?.requisicoes) return null;
+    const now = new Date();
+    const activeReqs = doc.monitoramento.requisicoes.filter(r => !r.excluidoDoMonitoramento);
+    
+    let isExpired = false;
+    let isUrgent = false;
+    let expiredServiceName = '';
+
+    activeReqs.forEach(r => {
+      const deadline = new Date(r.dataFinal);
+      const diffMs = deadline.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      
+      if (diffHours < 0) {
+        isExpired = true;
+        expiredServiceName = r.servico;
+      } else if (diffHours <= 48) {
+        isUrgent = true;
+      }
+    });
+
+    if (isExpired) return { type: 'EXPIRED', label: `⏰ PRAZO VENCIDO: ${expiredServiceName.toUpperCase()}`, color: 'bg-red-600 animate-pulse' };
+    if (isUrgent) return { type: 'URGENT', label: '🟡 PRAZO URGENTE (48H)', color: 'bg-amber-500' };
+    return null;
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-2xl border border-[#E5E7EB] shadow-sm space-y-6">
@@ -68,22 +97,54 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, currentUser, onS
 
       <div className="grid grid-cols-1 gap-4">
         {filteredDocs.map(doc => {
-          const mainStatus = doc.status[doc.status.length - 1] || 'NAO_LIDO';
+          const mainStatus = doc.status[doc.status.length - 1] || 'AGUARDANDO_ANALISE';
           const style = getStatusStyle(mainStatus);
           const refCouncilor = INITIAL_USERS.find(u => u.id === doc.conselheiro_referencia_id);
           const provCouncilor = INITIAL_USERS.find(u => u.id === doc.conselheiro_providencia_id);
           const isReferencia = doc.conselheiro_referencia_id === currentUser.id;
+          const isImediataResponsavel = doc.conselheiro_providencia_id === currentUser.id;
+          
           const isValidationPending = doc.status.includes('AGUARDANDO_VALIDACAO');
           const isSignaturePendingForMe = doc.medidas_detalhadas?.some(m => m.conselheiros_requeridos.includes(currentUser.nome.toUpperCase()) && !m.confirmacoes.some(c => c.usuario_id === currentUser.id));
 
+          // DIRETRIZ 78: Alerta Pulsante de Soberania Técnica
+          const isIncompleteTipification = doc.status.includes('TIPIFICACAO_INCOMPLETA') || doc.status.includes('AGUARDANDO_ANALISE');
+          const isCriticalPending = isImediataResponsavel && isIncompleteTipification;
+          
+          const isRevalidationNeeded = isReferencia && isValidationPending && !isSignaturePendingForMe && !isImediataResponsavel;
+
+          const deadlineAlert = getDeadlineAlerts(doc);
+
           return (
-            <div key={doc.id} onClick={() => onSelectDoc(doc.id)} className={`bg-white rounded-2xl border border-[#E5E7EB] ${style.border} border-l-4 shadow-sm hover:shadow-md transition-all cursor-pointer group overflow-hidden`}>
+            <div key={doc.id} onClick={() => onSelectDoc(doc.id)} className={`bg-white rounded-2xl border border-[#E5E7EB] ${style.border} border-l-4 shadow-sm hover:shadow-md transition-all cursor-pointer group overflow-hidden ${isCriticalPending ? 'ring-4 ring-red-500 ring-offset-4 animate-pulse' : ''}`}>
                <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex-1 space-y-4">
                      <div className="flex flex-wrap items-center gap-2">
                         <span className={`flex items-center gap-2 px-3 py-1 rounded-lg text-white text-[10px] font-black uppercase tracking-widest ${style.color}`}>{style.icon} {STATUS_LABELS[mainStatus]}</span>
-                        {isValidationPending && isReferencia && <span className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg animate-pulse"><ShieldAlert className="w-3.5 h-3.5" /> Validar SIMCT</span>}
-                        {isSignaturePendingForMe && isValidationPending && <span className="flex items-center gap-2 px-3 py-1 bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest rounded-lg animate-pulse"><ClipboardCheck className="w-3.5 h-3.5" /> Assinar SIMCT</span>}
+                        
+                        {deadlineAlert && (
+                          <span className={`flex items-center gap-2 px-3 py-1 text-white text-[9px] font-black uppercase tracking-widest rounded-lg ${deadlineAlert.color}`}>
+                             <Clock className="w-3.5 h-3.5" /> {deadlineAlert.label}
+                          </span>
+                        )}
+
+                        {isCriticalPending && (
+                          <span className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-[11px] font-black uppercase tracking-[0.1em] rounded-xl animate-bounce shadow-lg">
+                             <TriangleAlert className="w-4 h-4 fill-white text-red-600" /> 🚨 VOCÊ É A IMEDIATA: Tipificação Obrigatória Pendente
+                          </span>
+                        )}
+
+                        {isRevalidationNeeded && (
+                          <span className="flex items-center gap-2 px-3 py-1 bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest rounded-lg">
+                             <RefreshCw className="w-3.5 h-3.5" /> 🟡 ATENÇÃO: REVALIDAÇÃO
+                          </span>
+                        )}
+
+                        {isSignaturePendingForMe && isValidationPending && !isCriticalPending && (
+                          <span className="flex items-center gap-2 px-3 py-1 bg-amber-600 text-white text-[9px] font-black uppercase tracking-widest rounded-lg">
+                             <ClipboardCheck className="w-3.5 h-3.5" /> Assinar SIMCT
+                          </span>
+                        )}
                         <span className="text-[11px] font-mono font-bold text-[#9CA3AF] uppercase">#{doc.id}</span>
                      </div>
                      <div>
@@ -92,13 +153,31 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents, currentUser, onS
                            <div className="flex items-center gap-2 text-[12px] text-[#4B5563] font-medium uppercase"><UserRound className="w-3.5 h-3.5 text-[#9CA3AF]" /> MÃE: <span className="font-bold text-[#1F2937]">{doc.genitora_nome}</span></div>
                            <div className="flex items-center gap-2 text-[12px] text-[#4B5563] font-medium uppercase"><Clock className="w-3.5 h-3.5 text-[#9CA3AF]" /> {new Date(doc.data_recebimento).toLocaleDateString('pt-BR')}</div>
                         </div>
+                        {isCriticalPending && (
+                          <p className="text-[10px] font-black text-red-600 uppercase mt-3 tracking-widest bg-red-50 p-2 rounded-lg border border-red-100">
+                            ⚠️ Bloqueio Institucional: Este caso exige sua análise técnica imediata conforme Art. 131 do ECA.
+                          </p>
+                        )}
+                        {isRevalidationNeeded && (
+                          <p className="text-[10px] font-black text-amber-600 uppercase mt-2 tracking-widest">
+                            🔄 REVALIDAÇÃO: Este procedimento foi alterado e aguarda sua nova assinatura.
+                          </p>
+                        )}
                      </div>
                      <div className="flex flex-wrap items-center gap-4 pt-2">
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-lg text-[11px] font-bold text-[#2563EB] uppercase"><UserCheck className="w-3 h-3" /> Titular: {refCouncilor?.nome || 'N/A'}</div>
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-lg text-[11px] font-bold text-amber-600 uppercase"><Zap className="w-3 h-3" /> Providência: {provCouncilor?.nome || 'N/A'}</div>
                      </div>
                   </div>
-                  <div className="shrink-0 flex items-center gap-2">
+                  <div className="shrink-0 flex items-center gap-3">
+                     {isCriticalPending && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onSelectDoc(doc.id); }}
+                          className="px-6 py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-[12px] tracking-[0.1em] shadow-2xl shadow-red-200 hover:bg-red-700 transition-all flex items-center justify-center gap-2 active:scale-95"
+                        >
+                          <Scale className="w-5 h-5" /> [Tipificar Agora]
+                        </button>
+                     )}
                      {!isReadOnly && <button onClick={(e) => { e.stopPropagation(); onEditDoc(doc.id); }} className="p-3 bg-white border border-[#E5E7EB] text-[#4B5563] rounded-xl hover:bg-[#111827] hover:text-white transition-all"><Edit2 className="w-4 h-4" /></button>}
                      <button className="p-3 bg-[#111827] text-white rounded-xl shadow-lg hover:bg-[#2563EB] transition-all"><Eye className="w-4 h-4" /></button>
                   </div>

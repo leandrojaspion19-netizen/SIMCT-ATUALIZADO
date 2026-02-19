@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2 } from 'lucide-react';
-import { User, Documento, Log, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
+import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2, History } from 'lucide-react';
+import { User, Documento, Log, LogType, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
 import { INITIAL_USERS, UserWithPassword } from './constants';
 import DocumentList from './components/DocumentList';
 import DocumentRegistration from './components/DocumentRegistration';
@@ -80,6 +81,8 @@ const App: React.FC = () => {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [forceDirectEdit, setForceDirectEdit] = useState(false);
 
+  const isLud = useMemo(() => currentUser?.nome === 'LUDIMILA', [currentUser]);
+
   useEffect(() => {
     const savedDocs = localStorage.getItem('pt_docs');
     const savedLogs = localStorage.getItem('pt_logs');
@@ -120,37 +123,84 @@ const App: React.FC = () => {
     localStorage.setItem('pt_ack_reminders', JSON.stringify(acknowledgedReminderIds));
   }, [documents, logs, files, users, agenda, acknowledgedEventIds, acknowledgedReminderIds]);
 
-  const addLog = useCallback((docId: string, acao: string) => {
-    if (!currentUser) return;
+  const addLog = useCallback((docId: string, acao: string, tipo: LogType = 'SISTEMA', customUser?: User) => {
+    const user = customUser || currentUser;
+    if (!user) return;
     const newLog: Log = { 
       id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, 
       documento_id: docId, 
-      usuario_id: currentUser.id, 
-      usuario_nome: currentUser.nome, 
+      usuario_id: user.id, 
+      usuario_nome: user.nome, 
       acao, 
+      tipo,
       data_hora: new Date().toISOString() 
     };
     setLogs(prev => [newLog, ...prev]);
   }, [currentUser]);
 
+  const getPendingImediataCount = useCallback(() => {
+    if (!currentUser) return 0;
+    return documents.filter(d => {
+       const isImediataResponsavel = d.conselheiro_providencia_id === currentUser.id;
+       const isIncomplete = d.status.includes('TIPIFICACAO_INCOMPLETA') || d.status.includes('AGUARDANDO_ANALISE');
+       return isImediataResponsavel && isIncomplete;
+    }).length;
+  }, [currentUser, documents]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+       const pending = getPendingImediataCount();
+       if (pending > 0) {
+          e.preventDefault();
+          e.returnValue = '';
+       }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [getPendingImediataCount]);
+
+  const handleLogout = () => {
+    const pending = getPendingImediataCount();
+    if (pending > 0) {
+       if (!window.confirm(`⚠️ BLOQUEIO INSTITUCIONAL: Você possui ${pending} procedimentos aguardando sua TIPIFICAÇÃO OBRIGATÓRIA (Imediata). O descumprimento pode gerar sanções. Deseja realmente sair sem finalizar?`)) {
+          setActiveTab('my-docs');
+          return;
+       }
+    }
+    addLog('SISTEMA', `LOGOUT: Sessão encerrada voluntariamente.`, 'SEGURANÇA');
+    setCurrentUser(null);
+  };
+
   const handleOpenDocument = useCallback((id: string, isFromReference: boolean = false) => {
     setSelectedDocId(id);
     if (isFromReference) setForceDirectEdit(true);
-    addLog(id, `VISUALIZAÇÃO: Documento aberto por ${currentUser?.nome}.`);
-  }, [addLog, currentUser]);
+    addLog(id, `VISUALIZAÇÃO: Prontuário aberto para consulta de dados técnicos.`, 'DOCUMENTO');
+  }, [addLog]);
 
   const handleDocumentSubmit = (data: any, files: File[]) => {
     if (editingDocId) {
       setDocuments(prev => prev.map(d => d.id === editingDocId ? { ...d, ...data } : d));
-      addLog(editingDocId, `EDIÇÃO: Registro atualizado por ${currentUser?.nome}.`);
+      addLog(editingDocId, `EDIÇÃO: Registro de prontuário atualizado administrativamente.`, 'DOCUMENTO');
       setEditingDocId(null);
       handleNavigate('dashboard');
       return;
     }
     const id = `doc-${Math.random().toString(36).substr(2, 9)}`;
-    const newDoc: Documento = { ...data, id, criado_em: new Date().toISOString(), status: ['NAO_LIDO'], criado_por_id: currentUser!.id, ciencia_registrada_por: [], distribuicao_automatica: !data.is_manual_override };
+    const newDoc: Documento = { 
+      ...data, 
+      id, 
+      criado_em: new Date().toISOString(), 
+      status: ['AGUARDANDO_ANALISE'], 
+      criado_por_id: currentUser!.id, 
+      ciência_registrada_por: [], 
+      distribuicao_automatica: !data.is_manual_override 
+    };
+    
+    const refName = INITIAL_USERS.find(u => u.id === newDoc.conselheiro_referencia_id)?.nome || 'N/A';
+    const provName = INITIAL_USERS.find(u => u.id === newDoc.conselheiro_providencia_id)?.nome || 'N/A';
+
     setDocuments(prev => [newDoc, ...prev]);
-    addLog(id, `CRIAÇÃO: Procedimento registrado no SIMCT por ${currentUser?.nome}.`);
+    addLog(id, `CRIAÇÃO: Novo procedimento registrado. REF: [${refName}] | IMEDIATA: [${provName}].`, 'DOCUMENTO');
     handleNavigate('dashboard');
   };
 
@@ -161,34 +211,22 @@ const App: React.FC = () => {
     setActiveTab(tab); 
   };
 
-  const activeAlert = useMemo(() => {
-    if (!currentUser) return null;
-    const now = new Date();
-    return agenda.find(event => {
-      const isMyEvent = currentUser.perfil === 'ADMIN' || event.conselheiro_id === currentUser.id;
-      if (!isMyEvent) return false;
-      if (acknowledgedEventIds.includes(event.id)) return false;
-      try {
-        const eventDate = new Date(`${event.data}T${event.hora}:00`);
-        const diffMs = eventDate.getTime() - now.getTime();
-        const diffHours = diffMs / (1000 * 60 * 60);
-        return diffHours > -0.5 && diffHours <= 2;
-      } catch (e) {
-        return false;
-      }
-    }) || null;
-  }, [agenda, currentUser, acknowledgedEventIds]);
-
-  const handleDismissAlert = useCallback((id: string) => {
-    setAcknowledgedEventIds(prev => [...prev, id]);
-  }, []);
-
   const renderContent = () => {
     if (!currentUser) return null;
-    const isLud = currentUser.nome === 'LUDIMILA';
     const isAdministrative = currentUser.perfil === 'ADMIN' || currentUser.perfil === 'ADMINISTRATIVO';
     
-    if (activeTab === 'user-management' && isLud) return <UserManagementPanel users={users} onUpdateUser={(id, upd) => setUsers(prev => prev.map(u => u.id === id ? {...u, ...upd} : u))} onAddLog={(action) => addLog('SISTEMA', action)} />;
+    if (activeTab === 'user-management' && isLud) return (
+      <UserManagementPanel 
+        users={users} 
+        onUpdateUser={(id, upd) => {
+          const target = users.find(u => u.id === id);
+          if (upd.status) addLog('SISTEMA', `RH: Usuário ${target?.nome} teve status alterado para ${upd.status}.`, 'SEGURANÇA');
+          if (upd.senha) addLog('SISTEMA', `RH: Senha do usuário ${target?.nome} redefinida por administrador.`, 'SEGURANÇA');
+          setUsers(prev => prev.map(u => u.id === id ? {...u, ...upd} : u));
+        }} 
+        onAddLog={(action) => addLog('SISTEMA', action, 'SEGURANÇA')} 
+      />
+    );
     
     if (activeTab === 'register' && isLud) {
       setActiveTab('dashboard');
@@ -201,7 +239,14 @@ const App: React.FC = () => {
     if (selectedDocId) {
       const doc = documents.find(d => d.id === selectedDocId);
       if (!doc) return null;
-      return <DocumentView document={doc} allDocuments={documents} files={[]} logs={logs.filter(l => l.documento_id === selectedDocId)} currentUser={currentUser} isReadOnly={isAdministrative} forceEdit={forceDirectEdit} onBack={() => setSelectedDocId(null)} onEdit={() => { setEditingDocId(doc.id); setActiveTab('edit'); }} onDelete={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onUpdateStatus={(id, s) => setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: s } : d))} onUpdateDocument={(id, fields) => setDocuments(prev => prev.map(d => d.id === id ? {...d, ...fields} : d))} onAddLog={addLog} onScience={() => {}} />;
+      return <DocumentView document={doc} allDocuments={documents} files={[]} logs={logs.filter(l => l.documento_id === selectedDocId)} currentUser={currentUser} isReadOnly={isAdministrative} forceEdit={forceDirectEdit} onBack={() => setSelectedDocId(null)} onEdit={() => { setEditingDocId(doc.id); setActiveTab('edit'); }} onDelete={(id) => { 
+          addLog(id, `EXCLUSÃO: Documento removido permanentemente do banco de dados SIMCT.`, 'DOCUMENTO');
+          setDocuments(prev => prev.filter(d => d.id !== id));
+          setSelectedDocId(null);
+      }} onUpdateStatus={(id, s) => {
+          addLog(id, `STATUS: Documento alterado para a situação [${s[s.length-1]}].`, 'SISTEMA');
+          setDocuments(prev => prev.map(d => d.id === id ? { ...d, status: s } : d));
+      }} onUpdateDocument={(id, fields) => setDocuments(prev => prev.map(d => d.id === id ? {...d, ...fields} : d))} onAddLog={addLog} onScience={() => {}} />;
     }
 
     switch (activeTab) {
@@ -212,19 +257,36 @@ const App: React.FC = () => {
           }
           return true;
         });
-        return <DocumentList documents={dashboardDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={handleOpenDocument} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
+        return <DocumentList documents={dashboardDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={handleOpenDocument} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
+            addLog(id, `EXCLUSÃO: Documento removido permanentemente via Painel Geral.`, 'DOCUMENTO');
+            setDocuments(prev => prev.filter(d => d.id !== id));
+        }} onScience={() => {}} onUpdateStatus={() => {}} />;
+      
       case 'my-docs':
-        const myReferencedDocs = documents.filter(d => 
-          d.conselheiro_referencia_id === currentUser.id || 
-          d.conselheiro_providencia_id === currentUser.id ||
-          (d.conselheiros_providencia_nomes && d.conselheiros_providencia_nomes.some(n => n.toUpperCase() === currentUser.nome.toUpperCase()))
-        );
-        return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={(id) => handleOpenDocument(id, true)} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} onScience={() => {}} onUpdateStatus={() => {}} />;
-      case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={handleOpenDocument} onUpdateMonitoring={(id, m) => { setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); addLog(id, "Prorrogação de prazo registrada."); }} onRemoveMonitoring={(id) => setDocuments(prev => prev.filter(d => d.id !== id))} isReadOnly={isAdministrative} />;
-      case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={isLud || currentUser.perfil === 'ADMINISTRATIVO'} />;
+        const myReferencedDocs = documents.filter(d => {
+          const isFixedRef = d.conselheiro_referencia_id === currentUser.id;
+          const isImediata = d.conselheiro_providencia_id === currentUser.id;
+          return isFixedRef || isImediata;
+        });
+        return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={(id) => handleOpenDocument(id, true)} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
+            addLog(id, `EXCLUSÃO: Documento removido permanentemente via Minha Referência.`, 'DOCUMENTO');
+            setDocuments(prev => prev.filter(d => d.id !== id));
+        }} onScience={() => {}} onUpdateStatus={() => {}} />;
+      
+      case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={handleOpenDocument} onAddLog={addLog} onUpdateMonitoring={(id, m) => { 
+          setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); 
+      }} onRemoveMonitoring={(id) => {
+          addLog(id, `MONITORAMENTO: Acompanhamento de caso encerrado com sucesso.`, 'MONITORAMENTO');
+          setDocuments(prev => prev.filter(d => d.id !== id));
+      }} isReadOnly={isAdministrative} />;
+      case 'agenda': return <AgendaView agenda={agenda} setAgenda={setAgenda} currentUser={currentUser} effectiveUserId={currentUser.id} isReadOnly={isLud || currentUser.perfil === 'ADMINISTRATIVO'} onAddLog={(desc) => addLog('SISTEMA', desc, 'SISTEMA')} />;
       case 'search': return <AdvancedSearch documents={documents} currentUser={currentUser} onSelectDoc={handleOpenDocument} />;
       case 'logs': return <AuditLogViewer logs={logs} />;
-      case 'settings': return <SettingsView currentUser={currentUser} onUpdatePassword={(p) => { setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, senha: p } : u)); return true; }} />;
+      case 'settings': return <SettingsView currentUser={currentUser} onUpdatePassword={(p) => { 
+          setUsers(prev => prev.map(u => u.id === currentUser.id ? { ...u, senha: p } : u)); 
+          addLog('SISTEMA', `SEGURANÇA: Senha e assinatura digital alterada pelo próprio usuário.`, 'SEGURANÇA');
+          return true; 
+      }} />;
       case 'statistics': return <StatisticsView documents={documents} />;
       default: return null;
     }
@@ -246,11 +308,27 @@ const App: React.FC = () => {
             setLoginError(null); 
             const userInput = (selectedUserId || '').trim().toUpperCase();
             const user = users.find(u => (u.nome || '').toUpperCase() === userInput); 
-            if (!user || user.senha !== password) { setLoginError("Erro: Credenciais inválidas."); return; } 
-            if (user.status === 'BLOQUEADO') { setLoginError("ACESSO BLOQUEADO: PROCURE A ADM GERAL."); return; } 
-            if (!acceptedTerms) { setLoginError("Obrigatório aceitar termos LGPD."); return; } 
+            
+            if (!user || user.senha !== password) { 
+              setLoginError("Erro: Credenciais inválidas."); 
+              if (user) addLog('SISTEMA', `FALHA DE SEGURANÇA: Tentativa de login com senha incorreta para o usuário [${user.nome}].`, 'SEGURANÇA', user);
+              return; 
+            } 
+            
+            if (user.status === 'BLOQUEADO') { 
+              setLoginError("ACESSO BLOQUEADO: PROCURE A ADM GERAL."); 
+              addLog('SISTEMA', `BLOQUEIO: Usuário bloqueado [${user.nome}] tentou acessar o sistema.`, 'SEGURANÇA', user);
+              return; 
+            } 
+            
+            if (!acceptedTerms) { 
+              setLoginError("Obrigatório aceitar termos LGPD."); 
+              addLog('SISTEMA', `SEGURANÇA: Acesso negado. Usuário [${user.nome}] recusou termos LGPD.`, 'SEGURANÇA', user);
+              return; 
+            } 
+            
             setCurrentUser(user); 
-            addLog('SISTEMA', 'Sessão SIMCT iniciada com sucesso.'); 
+            addLog('SISTEMA', `LOGIN: Autenticação realizada com sucesso. Termos LGPD aceitos.`, 'SEGURANÇA', user);
           }} className="space-y-6">
             <div className="relative">
               <input placeholder="USUÁRIO" className="w-full p-4 pl-12 bg-slate-50 border border-[#E5E7EB] rounded-xl outline-none font-bold uppercase focus:border-[#2563EB] transition-all" value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} />
@@ -283,10 +361,11 @@ const App: React.FC = () => {
           <NavItem icon={<CalendarDays className="w-5 h-5" />} label="Agenda" active={activeTab === 'agenda'} onClick={() => handleNavigate('agenda')} collapsed={!isSidebarOpen} />
           <NavItem icon={<Database className="w-5 h-5" />} label="Busca Ativa" active={activeTab === 'search'} onClick={() => handleNavigate('search')} collapsed={!isSidebarOpen} />
           <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings')} collapsed={!isSidebarOpen} />
+          <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings'} collapsed={!isSidebarOpen} />
           {currentUser.nome === 'LUDIMILA' && <NavItem icon={<UserCog className="w-5 h-5" />} label="Gestão de RH" active={activeTab === 'user-management'} onClick={() => handleNavigate('user-management')} collapsed={!isSidebarOpen} />}
+          {isLud && <NavItem icon={<History className="w-5 h-5" />} label="Audit Log" active={activeTab === 'logs'} onClick={() => handleNavigate('logs')} collapsed={!isSidebarOpen} />}
         </nav>
-        <div className="p-4 border-t border-white/5"><button onClick={() => setCurrentUser(null)} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><LogOut className="w-5 h-5" />{isSidebarOpen && <span className="text-[13px] font-semibold uppercase">Logout</span>}</button></div>
+        <div className="p-4 border-t border-white/5"><button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><LogOut className="w-5 h-5" />{isSidebarOpen && <span className="text-[13px] font-semibold uppercase">Logout</span>}</button></div>
       </aside>
       <main className={`flex-1 ${isSidebarOpen ? 'ml-80' : 'ml-24'} transition-all min-h-screen`}>
         <div className="p-8">
@@ -296,7 +375,6 @@ const App: React.FC = () => {
           </header>
           {renderContent()}
         </div>
-        {activeAlert && <AppointmentAlert event={activeAlert} onView={(id) => { handleDismissAlert(id); setActiveTab('agenda'); }} onDismiss={handleDismissAlert} />}
       </main>
     </div>
   );
