@@ -108,7 +108,7 @@ export const UNIFIED_GENDER_OPTIONS = ["Masculino (Cisgênero)", "Feminino (Cisg
 
 export const AGENTES_VIOLADORES_ESTRUTURA: Record<string, { options: string[] }> = {
   "ESTADO": { options: ["Hospitais", "Escolas", "Postos de Saúde", "Cartórios", "Defensoria", "Judiciário", "Ministério Público", "Polícias", "Creches"] },
-  "FAMÍLIA": { options: ["Mãe", "Pai", "Padrasto", "Madrasta", "Avós", "Irmãos", "Tios", "Parentes", "Responsável Legal"] },
+  "FAMÍLIA": { options: ["Mãe", "Pai", "Padrasto", "MADRASTA", "Avós", "Irmãos", "Tios", "Parentes", "Responsável Legal"] },
   "SOCIEDADE": { options: ["Vizinhos", "Empresas", "Entidades Religiosas", "Escolas Privadas", "Hospitais Privados"] },
   "PRÓPRIA CONDUTA": { options: ["Atos da própria criança ou adolescente"] }
 };
@@ -133,19 +133,26 @@ export const MEDIDAS_129_ECA = [
   { id: 'VII', label: 'VII - Advertência: advertência formal registrada em termo.' }
 ];
 
+// DIRETRIZ 87: Catalogação Integral do Art. 136 ECA
 export const ATRIBUICOES_136_ECA = [
-  { id: 'I', label: 'I - Atender Crianças/Adolescentes: (Arts. 98 e 105).' },
-  { id: 'II', label: 'II - Atender/Aconselhar Pais: (Art. 129).' },
-  { id: 'III-a', label: 'III - Promover Execução: (a) Requisitar serviços de saúde, educação, assistência social.' },
-  { id: 'III-b', label: 'III - Representar por descumprimento injustificado de deliberações.' },
-  { id: 'IV/V', label: 'IV/V - Encaminhamentos: Notícia de fato ao MP ou autoridade judiciária.' },
-  { id: 'VII', label: 'VII - Notificações: Expedir notificações oficiais.' },
-  { id: 'VIII', label: 'VIII - Certidões: Requisitar certidões de nascimento/óbito.' },
-  { id: 'XI', label: 'XI - Poder Familiar: Representar para perda/suspensão do poder familiar.' },
-  { id: 'XIII-XX', label: 'XIII a XX - Lei Henry Borel: Medidas protetivas de urgência.' }
+  { id: 'I', label: 'I - Atender crianças e adolescentes nas hipóteses previstas nos arts. 98 e 105, aplicando as medidas previstas no art. 101, I a VII.' },
+  { id: 'II', label: 'II - Atender e aconselhar os pais ou responsável, aplicando as medidas previstas no art. 129, I a VII.' },
+  { id: 'III-a', label: 'III-a - Requisitar serviços públicos nas áreas de saúde, educação, assistência social, previdência, trabalho e segurança (Lei 15.268/2025).' },
+  { id: 'III-b', label: 'III-b - Representar junto à autoridade judiciária nos casos de descumprimento injustificado de suas deliberações.' },
+  { id: 'IV', label: 'IV - Encaminhar ao Ministério Público notícia de fato que constitua infração administrativa ou penal contra os direitos da criança ou adolescente.' },
+  { id: 'V', label: 'V - Encaminhar à autoridade judiciária os casos de sua competência.' },
+  { id: 'VI', label: 'VI - Providenciar a medida estabelecida pela autoridade judiciária para o adolescente autor de ato infracional.' },
+  { id: 'VII', label: 'VII - Expedir notificações.' },
+  { id: 'VIII', label: 'VIII - Requisitar certidões de nascimento e de óbito de criança ou adolescente, quando necessário.' },
+  { id: 'IX', label: 'IX - Assessorar o Poder Executivo local na elaboração da proposta orçamentária.' },
+  { id: 'X', label: 'X - Representar, em nome da pessoa e da família, contra a violação dos direitos previstos no art. 204, inciso II, da Constituição.' },
+  { id: 'XI', label: 'XI - Representar ao Ministério Público para efeito das ações de perda ou suspensão do poder familiar.' },
+  { id: 'XII', label: 'XII - Promover e incentivar ações de divulgação e treinamento para reconhecimento de sintomas de maus-tratos.' },
+  { id: 'XIII-XX', label: 'XIII a XX - Lei Henry Borel: Ações articuladas contra violência doméstica e medidas protetivas de urgência.' },
+  { id: 'PARAGRAFO_UNICO', label: 'P. Único - Comunicação imediata ao MP em caso de afastamento do convívio familiar.' }
 ];
 
-/* Added missing network map */
+// DIRETRIZ 85: Expansão do mapeamento da rede
 export const REDE_HORTOLANDIA = {
   'SAÚDE': {
     'HOSPITAIS': ['Hospital Municipal de Hortolândia (Mário Covas)'],
@@ -161,6 +168,15 @@ export const REDE_HORTOLANDIA = {
   'EDUCAÇÃO': {
     'SECRETARIA': ['Secretaria de Educação de Hortolândia'],
     'VAGAS': ['Setor de Vagas / Central de Matrículas']
+  },
+  'PREVIDÊNCIA': {
+    'SERVIÇOS': ['BPC/LOAS', 'Auxílio-Reclusão', 'Pensão por Morte', 'Perícia Médica']
+  },
+  'TRABALHO': {
+    'SERVIÇOS': ['Jovem Aprendiz', 'PETI (Erradicação Trabalho Infantil)', 'Qualificação Profissional']
+  },
+  'SEGURANÇA': {
+    'SERVIÇOS': ['Patrulha Maria da Penha', 'Policiamento Comunitário', 'Registro de Ocorrência']
   }
 };
 
@@ -178,7 +194,7 @@ export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
     "Atendimento inadequado": ["Falta orientação diagnóstica/tratamento", "Cirurgia desnecessária", "Falta precedência", "Extrações dentárias desnecessárias", "Danos procedimentos", "Negligência profissional"],
     "Práticas irregulares": ["Falta prontuário", "Exigência presença pais para atender", "Falta alojamento conjunto nascimento", "Falta não identificação recém-nascido", "Proibição permanência acompanhante", "Não identificação recém-nascido", "Retirada compulsória bebê"],
     "Ausência de ações específicas": ["Falta prevention drogas", "Falta tratamento agressor sexual", "Ausência info epidemias", "Ausência saneamento ambiental/básico"],
-    "Prejuízo por ação/omissão": ["Falta notificação doença infecto-contagiosa", "Recusa atendimento (filosófico/religioso)", "Omissão socorro", "Condições precárias abrigo/socioeducativo"],
+    "Prejuízo por action/omissão": ["Falta notificação doença infecto-contagiosa", "Recusa atendimento (filosófico/religioso)", "Omissão socorro", "Condições precárias abrigo/socioeducativo"],
     "Atos atentatórios": ["Ameaça morte", "Uso droga como violência", "Tentativa homicídio", "Tentativa suicídio", "Automutilação", "Extração ilícita órgãos"]
   },
   "EDUCAÇÃO, CULTURA, ESPORTE E LAZER": {

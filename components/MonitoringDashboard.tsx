@@ -24,10 +24,12 @@ import {
   EyeOff,
   AlertTriangle,
   ExternalLink,
-  MessageSquareText
+  MessageSquareText,
+  Plus,
+  Gavel
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { INITIAL_USERS } from '../constants';
+import { INITIAL_USERS, REDE_HORTOLANDIA } from '../constants';
 import { Documento, MonitoringInfo, User as UserType, RequisicaoServico, LogType } from '../types';
 
 interface MonitoringDashboardProps {
@@ -57,6 +59,16 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
   const [docToConfirmDelete, setDocToConfirmDelete] = useState<Documento | null>(null);
   const [extForm, setExtForm] = useState({ nova_data: '', justificativa: '' });
   const [collapsedDocs, setCollapsedDocs] = useState<Set<string>>(new Set());
+
+  // DIRETRIZ 94: Estado para Modal de Adicionar Serviço
+  const [addingServiceDoc, setAddingServiceDoc] = useState<Documento | null>(null);
+  const [newServiceForm, setNewServiceForm] = useState({
+    area: '',
+    servico: '',
+    prazoDias: 5,
+    dataFinal: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    observacoes: ''
+  });
 
   const filteredMonitoringDocs = useMemo(() => {
     return documents.filter(d => {
@@ -91,6 +103,41 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
     if (diff <= 2) return { bg: 'bg-red-50 text-red-600 border-red-300 animate-pulse', text: 'CRÍTICO (48H)', color: 'red' };
     if (diff <= 5) return { bg: 'bg-orange-50 text-orange-700 border-orange-200', text: 'URGENTE', color: 'orange' };
     return { bg: 'bg-green-50 text-green-700 border-green-200', text: 'EM DIA', color: 'green' };
+  };
+
+  const handleAddServiceInMonitoring = () => {
+    if (!addingServiceDoc || !newServiceForm.area || !newServiceForm.servico) return;
+
+    const currentMonitoring = addingServiceDoc.monitoramento!;
+    const newReq: RequisicaoServico = {
+      id: `req-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      area: newServiceForm.area,
+      servico: newServiceForm.servico,
+      prazoDias: newServiceForm.prazoDias,
+      dataFinal: newServiceForm.dataFinal,
+      isForaDaRede: false,
+      observacoes: newServiceForm.observacoes.toUpperCase()
+    };
+
+    const updatedRequisicoes = [...(currentMonitoring.requisicoes || []), newReq];
+
+    onUpdateMonitoring(addingServiceDoc.id, {
+      ...currentMonitoring,
+      requisicoes: updatedRequisicoes,
+      concluido: false // Reabre se estava concluído
+    });
+
+    onAddLog(addingServiceDoc.id, `MONITORAMENTO: Adicionou novo serviço de ${newServiceForm.area} (${newServiceForm.servico}) para monitoramento dinâmico.`, 'MONITORAMENTO');
+
+    setAddingServiceDoc(null);
+    setNewServiceForm({
+      area: '',
+      servico: '',
+      prazoDias: 5,
+      dataFinal: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      observacoes: ''
+    });
+    alert("Nova requisição adicionada ao monitoramento com sucesso.");
   };
 
   const handleExtendDeadline = () => {
@@ -228,7 +275,9 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
                 
                 const masterThermometer = getThermometerData(monitoring.prazoEsperado);
                 const hasExpiredReq = activeRequisicoes.some(r => getThermometerData(r.dataFinal).text.includes('VENCIDO'));
-                const hasUrgentReq = activeRequisicoes.some(r => getThermometerData(r.dataFinal).text.includes('URGENTE') || getThermometerData(r.dataFinal).text.includes('CRÍTICO'));
+                
+                // DIRETRIZ 94.3: Detalhes do Alerta Prioritário
+                const expiredReq = activeRequisicoes.find(r => getThermometerData(r.dataFinal).text.includes('VENCIDO'));
 
                 return (
                   <tr key={doc.id} className="hover:bg-slate-50 transition-all group">
@@ -240,9 +289,14 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
                           </span>
                         )}
                         {hasExpiredReq && (
-                          <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase border w-fit bg-red-600 text-white animate-pulse flex items-center gap-1">
-                            <ShieldAlert className="w-3 h-3" /> PRAZO VENCIDO
-                          </span>
+                          <div className="flex flex-col gap-1">
+                             <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase border w-fit bg-red-600 text-white animate-pulse flex items-center gap-1">
+                               <ShieldAlert className="w-3 h-3" /> PRAZO VENCIDO
+                             </span>
+                             <p className="text-[8px] font-black text-red-600 uppercase max-w-[150px] leading-tight">
+                               ⚠️ {expiredReq?.servico} não respondeu no prazo!
+                             </p>
+                          </div>
                         )}
                         {hasQualitativeNotes && (
                           <span className="px-3 py-1 rounded-lg text-[9px] font-black uppercase border w-fit bg-purple-50 text-purple-700 border-purple-200 flex items-center gap-1">
@@ -276,7 +330,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
                             {activeRequisicoes.map((req) => {
                               const therm = getThermometerData(req.dataFinal);
                               return (
-                                <div key={req.id} className={`p-3 rounded-xl border flex flex-col gap-2 relative group/req ${therm.bg}`}>
+                                <div key={req.id} className={`p-3 rounded-xl border flex flex-col gap-2 relative group/req ${therm.bg} ${therm.color === 'red' ? 'border-red-300 ring-2 ring-red-100 ring-offset-1' : ''}`}>
                                   <div className="flex justify-between items-start">
                                     <div className="flex items-start gap-2">
                                       {req.isForaDaRede ? <ExternalLink className="w-3.5 h-3.5 text-slate-500 mt-0.5 shrink-0" /> : <Building2 className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />}
@@ -322,15 +376,16 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
                     </td>
                     <td className="px-8 py-6 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {monitoring.prazoEsperado && (
-                          <button 
-                            onClick={() => setExtendingDoc(doc)}
-                            className="p-2.5 bg-blue-50 text-[#2563EB] rounded-lg hover:bg-[#2563EB] hover:text-white transition-all shadow-sm"
-                            title="Estender Prazo Geral"
-                          >
-                            <Timer className="w-4 h-4" />
-                          </button>
-                        )}
+                        {/* DIRETRIZ 94.1: Nova Ação Adicionar Serviço */}
+                        <button 
+                          onClick={() => setAddingServiceDoc(doc)}
+                          className="p-2.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-600 hover:text-white transition-all shadow-sm flex items-center gap-2"
+                          title="Adicionar Serviço em Monitoramento"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span className="hidden xl:inline text-[9px] font-black uppercase">Novo Serviço</span>
+                        </button>
+
                         <button 
                           onClick={() => onSelectDoc(doc.id)} 
                           className="p-2.5 bg-[#111827] text-white rounded-lg hover:bg-[#2563EB] transition-all shadow-sm"
@@ -362,6 +417,102 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({
         )}
       </section>
 
+      {/* DIRETRIZ 94.1: Modal Adicionar Serviço em Monitoramento */}
+      {addingServiceDoc && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 backdrop-blur-md bg-slate-900/60 animate-in fade-in duration-300">
+           <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-2xl w-full p-10 border border-[#E5E7EB] animate-in zoom-in-95 space-y-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-2 bg-purple-600"></div>
+              <button onClick={() => setAddingServiceDoc(null)} className="absolute top-6 right-6 p-2 text-slate-400 hover:bg-slate-50 rounded-xl transition-all"><X className="w-6 h-6"/></button>
+              
+              <header className="space-y-2">
+                 <div className="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm"><PlusCircle className="w-8 h-8" /></div>
+                 <h3 className="text-[20px] font-bold text-[#111827] uppercase tracking-tight">Adicionar Serviço em Monitoramento</h3>
+                 <p className="text-[12px] text-[#4B5563] font-bold uppercase tracking-widest">Ref: {addingServiceDoc.crianca_nome}</p>
+              </header>
+
+              <div className="space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Área da Rede *</label>
+                       <select 
+                         className="w-full p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl text-[13px] font-black uppercase outline-none focus:border-purple-600 transition-all"
+                         value={newServiceForm.area}
+                         onChange={e => setNewServiceForm({...newServiceForm, area: e.target.value, servico: ''})}
+                       >
+                          <option value="">Selecione a Área...</option>
+                          {Object.keys(REDE_HORTOLANDIA).map(area => <option key={area} value={area}>{area}</option>)}
+                       </select>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Equipamento / Serviço *</label>
+                       <select 
+                         disabled={!newServiceForm.area}
+                         className="w-full p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl text-[13px] font-black uppercase outline-none focus:border-purple-600 transition-all disabled:opacity-50"
+                         value={newServiceForm.servico}
+                         onChange={e => setNewServiceForm({...newServiceForm, servico: e.target.value})}
+                       >
+                          <option value="">Selecione o Serviço...</option>
+                          {newServiceForm.area && Object.entries(REDE_HORTOLANDIA[newServiceForm.area as keyof typeof REDE_HORTOLANDIA]).flatMap(([, services]) => (services as string[]).map(s => <option key={s} value={s}>{s}</option>))}
+                       </select>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Prazo para Resposta</label>
+                       <div className="flex flex-wrap gap-2">
+                          {[1, 2, 5, 10, 15].map(d => (
+                             <button 
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                   const data = new Date(Date.now() + d * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                                   setNewServiceForm({...newServiceForm, prazoDias: d, dataFinal: data});
+                                }}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${newServiceForm.prazoDias === d ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-100 text-slate-500 hover:bg-purple-100'}`}
+                             >
+                                {d === 1 ? '24h' : d === 2 ? '48h' : `${d} Dias`}
+                             </button>
+                          ))}
+                       </div>
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Data Limite</label>
+                       <input 
+                         type="date" 
+                         className="w-full p-4 bg-[#F9FAFB] border border-[#E5E7EB] rounded-2xl text-[13px] font-black outline-none"
+                         value={newServiceForm.dataFinal}
+                         onChange={e => {
+                            const diff = Math.ceil((new Date(e.target.value).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                            setNewServiceForm({...newServiceForm, dataFinal: e.target.value, prazoDias: diff});
+                         }}
+                       />
+                    </div>
+                 </div>
+
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><MessageSquare className="w-3.5 h-3.5" /> Observação / Objetivo do Encaminhamento</label>
+                    <textarea 
+                      className="w-full p-6 bg-[#F9FAFB] border border-[#E5E7EB] rounded-[1.5rem] text-[13px] font-medium uppercase outline-none focus:border-purple-600 transition-all min-h-[120px] shadow-inner"
+                      placeholder="DETALHE O QUE SE ESPERA DESSE ACOMPANHAMENTO ESPECÍFICO..."
+                      value={newServiceForm.observacoes}
+                      onChange={e => setNewServiceForm({...newServiceForm, observacoes: e.target.value})}
+                    />
+                 </div>
+              </div>
+
+              <button 
+                 onClick={handleAddServiceInMonitoring}
+                 disabled={!newServiceForm.area || !newServiceForm.servico}
+                 className="w-full py-5 bg-[#111827] text-white rounded-2xl font-black uppercase text-[14px] tracking-widest shadow-xl hover:bg-purple-600 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                 <Save className="w-6 h-6" /> [➕ ACIONAR SERVIÇO EM MONITORAMENTO]
+              </button>
+           </div>
+        </div>
+      )}
+
+      {/* Modais Existentes */}
       {docToConfirmDelete && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-6 backdrop-blur-md bg-slate-900/60 animate-in fade-in duration-300">
            <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden border border-[#E5E7EB] animate-in zoom-in-95 flex flex-col">

@@ -71,6 +71,7 @@ export interface RequisicaoServico {
   dataFinal: string;
   isForaDaRede: boolean;
   excluidoDoMonitoramento?: boolean;
+  observacoes?: string; // Diretriz 93.2
 }
 
 export interface MonitoringInfo {
@@ -112,6 +113,8 @@ export interface Documento {
   agentesVioladores: AgenteVioladorEntry[];
   medidas_detalhadas?: MedidaAplicada[];
   atribuicoes_136?: string[];
+  fundamentacao_tecnica?: string; // Diretriz 89.2
+  relato_providencias?: string; // Diretriz 89.2
   observacoes_iniciais: string;
   status: DocumentStatus[];
   conselheiro_referencia_id: string;

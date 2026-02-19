@@ -54,8 +54,8 @@ const LoginIllustration: React.FC = () => (
   </div>
 );
 
-const NavItem: React.FC<{ icon: React.ReactNode; label: string; active: boolean; onClick: () => void; collapsed?: boolean; }> = ({ icon, label, active, onClick, collapsed }) => (
-  <button onClick={onClick} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563EB] text-white shadow-md' : 'text-[#9CA3AF] hover:bg-white/5 hover:text-white'}`}>
+const NavItem: React.FC<{ icon: React.ReactNode; label: string; active: boolean; onClick: () => void; collapsed?: boolean; danger?: boolean; }> = ({ icon, label, active, onClick, collapsed, danger }) => (
+  <button onClick={onClick} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-[#2563EB] text-white shadow-md' : danger ? 'text-red-400 hover:bg-red-500/10 hover:text-white' : 'text-[#9CA3AF] hover:bg-white/5 hover:text-white'}`}>
     <div className="shrink-0">{icon}</div>
     {!collapsed && <span className="text-[14px] font-semibold uppercase tracking-wide whitespace-nowrap">{label}</span>}
   </button>
@@ -138,37 +138,14 @@ const App: React.FC = () => {
     setLogs(prev => [newLog, ...prev]);
   }, [currentUser]);
 
-  const getPendingImediataCount = useCallback(() => {
-    if (!currentUser) return 0;
-    return documents.filter(d => {
-       const isImediataResponsavel = d.conselheiro_providencia_id === currentUser.id;
-       const isIncomplete = d.status.includes('TIPIFICACAO_INCOMPLETA') || d.status.includes('AGUARDANDO_ANALISE');
-       return isImediataResponsavel && isIncomplete;
-    }).length;
-  }, [currentUser, documents]);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-       const pending = getPendingImediataCount();
-       if (pending > 0) {
-          e.preventDefault();
-          e.returnValue = '';
-       }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [getPendingImediataCount]);
-
+  // DIRETRIZ 91.2: LIBERDADE IRRESTRITA DE LOGOFF
   const handleLogout = () => {
-    const pending = getPendingImediataCount();
-    if (pending > 0) {
-       if (!window.confirm(`⚠️ BLOQUEIO INSTITUCIONAL: Você possui ${pending} procedimentos aguardando sua TIPIFICAÇÃO OBRIGATÓRIA (Imediata). O descumprimento pode gerar sanções. Deseja realmente sair sem finalizar?`)) {
-          setActiveTab('my-docs');
-          return;
-       }
-    }
-    addLog('SISTEMA', `LOGOUT: Sessão encerrada voluntariamente.`, 'SEGURANÇA');
+    const confirmSave = window.confirm("Deseja salvar as alterações pendentes em rascunho antes de sair?");
+    // O sistema apenas salvará o que estiver em rascunho e encerrará a sessão imediatamente.
+    addLog('SISTEMA', `Efetuou Logoff (Salvamento Rascunho: ${confirmSave ? 'SIM' : 'NÃO'})`, 'SEGURANÇA');
     setCurrentUser(null);
+    setSelectedDocId(null);
+    setActiveTab('dashboard');
   };
 
   const handleOpenDocument = useCallback((id: string, isFromReference: boolean = false) => {
@@ -265,7 +242,7 @@ const App: React.FC = () => {
       case 'my-docs':
         const myReferencedDocs = documents.filter(d => {
           const isFixedRef = d.conselheiro_referencia_id === currentUser.id;
-          const isImediata = d.conselheiro_providencia_id === currentUser.id;
+          const isImediata = d.conselheiros_providencia_nomes?.includes(currentUser.nome.toUpperCase());
           return isFixedRef || isImediata;
         });
         return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={(id) => handleOpenDocument(id, true)} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
@@ -360,12 +337,14 @@ const App: React.FC = () => {
           {currentUser.perfil === 'CONSELHEIRO' && (<><NavItem icon={<Briefcase className="w-5 h-5" />} label="Minha Referência" active={activeTab === 'my-docs'} onClick={() => handleNavigate('my-docs')} collapsed={!isSidebarOpen} /><NavItem icon={<Activity className="w-5 h-5" />} label="Monitoramento" active={activeTab === 'monitoring'} onClick={() => handleNavigate('monitoring')} collapsed={!isSidebarOpen} /></>)}
           <NavItem icon={<CalendarDays className="w-5 h-5" />} label="Agenda" active={activeTab === 'agenda'} onClick={() => handleNavigate('agenda')} collapsed={!isSidebarOpen} />
           <NavItem icon={<Database className="w-5 h-5" />} label="Busca Ativa" active={activeTab === 'search'} onClick={() => handleNavigate('search')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics')} collapsed={!isSidebarOpen} />
+          <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics'} collapsed={!isSidebarOpen} />
           <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings'} collapsed={!isSidebarOpen} />
           {currentUser.nome === 'LUDIMILA' && <NavItem icon={<UserCog className="w-5 h-5" />} label="Gestão de RH" active={activeTab === 'user-management'} onClick={() => handleNavigate('user-management')} collapsed={!isSidebarOpen} />}
           {isLud && <NavItem icon={<History className="w-5 h-5" />} label="Audit Log" active={activeTab === 'logs'} onClick={() => handleNavigate('logs')} collapsed={!isSidebarOpen} />}
         </nav>
-        <div className="p-4 border-t border-white/5"><button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all"><LogOut className="w-5 h-5" />{isSidebarOpen && <span className="text-[13px] font-semibold uppercase">Logout</span>}</button></div>
+        <div className="p-4 border-t border-white/5">
+          <NavItem icon={<LogOut className="w-5 h-5" />} label="Sair" active={false} onClick={handleLogout} collapsed={!isSidebarOpen} danger />
+        </div>
       </aside>
       <main className={`flex-1 ${isSidebarOpen ? 'ml-80' : 'ml-24'} transition-all min-h-screen`}>
         <div className="p-8">
