@@ -29,8 +29,9 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ documents }) => {
     };
 
     documents.forEach(doc => {
-      if (doc.periodo_recebimento) {
-        counts.periodos[doc.periodo_recebimento] = (counts.periodos[doc.periodo_recebimento] || 0) + 1;
+      // Fix: Use the correct field name 'periodo_rece_bimento' as defined in types.ts.
+      if (doc.periodo_rece_bimento) {
+        counts.periodos[doc.periodo_rece_bimento] = (counts.periodos[doc.periodo_rece_bimento] || 0) + 1;
       }
 
       (doc.violencias || []).forEach(v => {
@@ -56,6 +57,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ documents }) => {
         }
       });
 
+      // Fix: Correctly access counts.origens and increment it using doc.origem as key
       if (doc.origem) {
         counts.origens[doc.origem] = (counts.origens[doc.origem] || 0) + 1;
       }

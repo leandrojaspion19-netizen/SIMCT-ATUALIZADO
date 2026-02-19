@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Save, Clock, ShieldCheck, Database, FileText, UserRound, Baby, MapPin } from 'lucide-react';
 import { Documento, User, ChildData } from './types';
-import { BAIRROS, INITIAL_USERS, classifyTurno, CANAIS_COMUNICACAO, UNIFIED_GENDER_OPTIONS } from './constants';
+// Fix: CANAIS_COMUNICACAO does not exist in constants.tsx. Using CANAIS_COMUNICADO_LIST instead.
+import { BAIRROS, INITIAL_USERS, classifyTurno, CANAIS_COMUNICADO_LIST, UNIFIED_GENDER_OPTIONS } from './constants';
 
 interface DocumentRegistrationProps {
   documents: Documento[];
@@ -16,7 +16,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({ currentUser
   
   const [formData, setFormData] = useState({
     origem: '', canal_comunicado: '', tipo_documento: '',
-    data_recebimento: new Date().toISOString().split('T')[0],
+    data_rece_bimento: new Date().toISOString().split('T')[0],
     hora_rece_bimento: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
     genitora_nome: '', bairro: '', crianca_nome: '',
     criancas: [{ nome: '', data_nascimento: '', genero_identidade: '' }] as ChildData[]
@@ -34,7 +34,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({ currentUser
     const finalData = {
       ...formData,
       informacoes_documento: `${formData.tipo_documento} - INICIAL`,
-      periodo_rece_bimento: classifyTurno(formData.data_recebimento, formData.hora_rece_bimento),
+      periodo_rece_bimento: classifyTurno(formData.data_rece_bimento, formData.hora_rece_bimento),
       status: ['AGUARDANDO_ANALISE']
     };
 
@@ -67,7 +67,7 @@ const DocumentRegistration: React.FC<DocumentRegistrationProps> = ({ currentUser
            <div className="grid grid-cols-3 gap-6">
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase">Data do Aporte</label>
-                 <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl" value={formData.data_recebimento} onChange={e => setFormData({...formData, data_recebimento: e.target.value})} />
+                 <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl" value={formData.data_rece_bimento} onChange={e => setFormData({...formData, data_rece_bimento: e.target.value})} />
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase">Hora do Aporte</label>

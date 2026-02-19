@@ -25,18 +25,16 @@ export type DocumentStatus =
   | 'CONCLUIDO'
   | 'TIPIFICACAO_INCOMPLETA'
   | 'AGUARDANDO_ANALISE'
-  | 'NOTIFICACAO'
-  | 'NOTIFICACAO_REFERENCIA'
-  | 'NOTICIA_FATO_ENCAMINHADA'
-  | 'AGUARDANDO_RESPOSTA'
-  | 'RESPONDER_OFICIO'
-  | 'OFICIO_RESPONDIDO'
-  | 'SOLICITACAO_REDE'
-  | 'RESPOSTA_ENVIADA'
   | 'ARQUIVADO'
   | 'MONITORAMENTO'
-  | 'SOLICITAR_REUNIAO_REDE'
-  | 'EMAIL_ENCAMINHADO';
+  | 'AGENDAR_REUNIAO_REDE'
+  | 'AGUARDAR_RESPOSTA_EMAIL'
+  | 'EMAIL_RESPONDIDO'
+  | 'ENCAMINHAR_NOTICIA_FATO'
+  | 'NOTIFICAR'
+  | 'OFICIO_RESPONDIDO'
+  | 'RESPONDER_EMAIL'
+  | 'SOLICITAR_REUNIAO_REDE';
 
 export interface MedidaConfirmacao {
   usuario_id: string;
@@ -71,7 +69,7 @@ export interface RequisicaoServico {
   dataFinal: string;
   isForaDaRede: boolean;
   excluidoDoMonitoramento?: boolean;
-  observacoes?: string; // Diretriz 93.2
+  observacoes?: string; 
 }
 
 export interface MonitoringInfo {
@@ -107,17 +105,23 @@ export interface Documento {
   criancas: ChildData[]; 
   genitora_nome: string;
   cpf_genitora?: string; 
+  cpf_crianca?: string;
   bairro: string; 
+  endereco?: string;
+  telefone?: string;
   informacoes_documento: string; 
   violacoesSipia: SipiaViolation[];
   agentesVioladores: AgenteVioladorEntry[];
+  // Fix: Added violencias field to allow recording specific violence types for statistics.
+  violencias?: ViolenceType[];
   medidas_detalhadas?: MedidaAplicada[];
   atribuicoes_136?: string[];
-  fundamentacao_tecnica?: string; // Diretriz 89.2
-  relato_providencias?: string; // Diretriz 89.2
+  fundamentacao_tecnica?: string; 
+  relato_providencias?: string; 
   observacoes_iniciais: string;
   status: DocumentStatus[];
   conselheiro_referencia_id: string;
+  // Fix: Removed duplicate conselheiro_providencia_id field.
   conselheiro_providencia_id: string; 
   conselheiros_providencia_nomes: string[];
   criado_em: string;
@@ -131,6 +135,7 @@ export interface Documento {
   distribuicao_automatica?: boolean;
   is_manual_override?: boolean;
   snapshot_validado?: SnapshotComparativo;
+  justificativa_distribuicao?: string;
 }
 
 export type LogType = 'SEGURANÇA' | 'DOCUMENTO' | 'SISTEMA' | 'VALIDAÇÃO' | 'MONITORAMENTO';

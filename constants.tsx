@@ -12,29 +12,168 @@ export const INITIAL_USERS: UserWithPassword[] = [
   { id: 'admin3', nome: 'FATIMA', perfil: 'ADMIN', cargo: 'ADM', senha: '123456' },
   { id: 'cons1', nome: 'LEANDRO', perfil: 'CONSELHEIRO', cargo: 'Conselheiro', senha: '123456' },
   { id: 'cons2', nome: 'LUIZA', perfil: 'CONSELHEIRO', cargo: 'Conselheira', senha: '123456' },
+  { id: 'cons5', nome: 'MIRIAN', perfil: 'CONSELHEIRO', cargo: 'Conselheira', senha: '123456' },
   { id: 'cons3', nome: 'MILENA', perfil: 'CONSELHEIRO', cargo: 'Conselheira', senha: '123456' },
   { id: 'cons4', nome: 'SANDRA', perfil: 'CONSELHEIRO', cargo: 'Conselheira', senha: '123456' },
-  { id: 'cons5', nome: 'MIRIAN', perfil: 'CONSELHEIRO', cargo: 'Conselheira', senha: '123456' },
   { id: 'suplente1', nome: 'ROSILDA', perfil: 'SUPLENTE', cargo: 'Conselheira Suplente', senha: '123456', status: 'INATIVO' },
 ];
 
 export const RODIZIO_ALFABETICO = ['LEANDRO', 'LUIZA', 'MILENA', 'MIRIAN', 'SANDRA'];
 
-/* Added missing origin categories */
-export const ORIGENS_CATEGORIZADAS = [
+export const ORIGENS_HIERARQUICAS = [
   {
-    label: 'REDE DE PROTEÇÃO',
-    options: ['ESCOLAS', 'HOSPITAIS', 'POSTOS DE SAÚDE', 'CRAS', 'CREAS', 'CONSELHO TUTELAR (OUTROS)']
+    label: 'ASSISTÊNCIA SOCIAL',
+    options: [
+      'CRAS AMANDA', 'CRAS BRASIL', 'CRAS CENTRAL', 'CRAS NOVO ANGULO', 
+      'CRAS PRIMAVERA', 'CRAS SANTA IZABEL', 'CREAS CENTRAL', 
+      'DAS (DEPTO ASSISTÊNCIA SOCIAL)', 'INSTITUIÇÃO DE ACOLHIMENTO'
+    ].sort()
   },
   {
-    label: 'ÓRGÃOS JUDICIAIS',
-    options: ['MINISTÉRIO PÚBLICO', 'PODER JUDICIÁRIO', 'DELEGACIA DE POLÍCIA']
+    label: 'EDUCAÇÃO (ESTADUAL)',
+    options: [
+      'E.E. AGALVIRA PINTO MONTEIRO',
+      'E.E. DR. HONORINO FABBRI',
+      'E.E. GUIDO ROSOLEN',
+      'E.E. JARDIM ALINE',
+      'E.E. JARDIM SANTA CLARA DO LAGO',
+      'E.E. JONATAS DAVI VISEL DOS SANTOS',
+      'E.E. MANOEL IGNÁCIO DA SILVA',
+      'E.E. MARISTELA CAROLINA MELLIN',
+      'E.E. PASTOR ROBERTO RODRIGUES DE AZEVEDO',
+      'E.E. PAULO CAMILO DE CAMARGO',
+      'E.E. PRISCILA FERNANDES DA ROCHA',
+      'E.E. PROF. ANTONIO ZANLUCHI',
+      'E.E. PROF. ELISEO MARSON',
+      'E.E. PROF. EUZEBIO ANTONIO RODRIGUES',
+      'E.E. PROF. JOSÉ CLARET DIONISIO',
+      'E.E. PROF. WICKLEIN MACEDO SALDANHA',
+      'E.E. PROFª. CONCEIÇÃO A. T. G. CARDINALES',
+      'E.E. PROFª. CRISTIANE C. M. BRAGA',
+      'E.E. PROFª. HEDY MADALENA BOCCHI',
+      'E.E. PROFª. LIOMAR FREITAS CÂMARA',
+      'E.E. PROFª. LIOMAR FREITAS CÂMARA (CEL JTO)',
+      'E.E. PROFª. MARIA ANTONIETTA G. LA FORTEZZA',
+      'E.E. PROFª. MARIA CRISTINA DE SOUZA LOBO',
+      'E.E. PROFª. MARIA ROBERTA DE LIMA',
+      'E.E. PROFª. MARIA RITA ARAUJO COSTA',
+      'E.E. PROFª. PAULINA ROSA',
+      'E.E. PROFª. PRISCILA DE FÁTIMA PINTO',
+      'E.E. PROFª. RAQUEL SAES MELHADO DA SILVA',
+      'E.E. RECREIO ALVORADA',
+      'E.E. YASUO SASAKI',
+      'ETEC DE HORTOLÂNDIA',
+      'CPP HORTOLÂNDIA (EDUCAÇÃO)'
+    ].sort()
   },
   {
-    label: 'DENÚNCIAS',
-    options: ['DISQUE 100', 'DENÚNCIA ESPONTÂNEA', 'DENÚNCIA ANÔNIMA']
+    label: 'EDUCAÇÃO (MUNICIPAL)',
+    options: [
+      'EMEF AMANDA', 
+      'EMEF JD. BRASIL', 
+      'EMEF MARLECIENE PEREIRA', 
+      'EMEF RENATO COSTA LIMA', 
+      'EMEF TARSILA DO AMARAL', 
+      'EMEI ALVORADA', 
+      'EMEI PRIMAVERA', 
+      'EMEI ROSOLÉM', 
+      'EMEI SANTA IZABEL',
+      'EMEF ARMELINDA ESPURIO DA SILVA',
+      'EMEIEF BAIRRO TAQUARA BRANCA',
+      'EMEI BAIRRO TRÊS CASAS',
+      'EMEF CAIO FERNANDO GOMES PEREIRA',
+      'CENTRO DE EDUCAÇÃO BÁSICA DO MUNICÍPIO DE HORTOLÂNDIA',
+      'CIER - CENTRO INTEGRADO DE EDUCAÇÃO E REABILITAÇÃO',
+      'EMEF PROF. CLAUDIO ROBERTO MARQUES',
+      'EMEF DAYLA CRISTINA SOUZA DE AMORIM',
+      'EMEF SAMUEL DA SILVA MENDONÇA',
+      'EMEI ANGELITA INOCENTE NUNES BIDUTTI',
+      'EMEI ANTONIETA CLAUDINE OLIVEIRA FUSARO CATUZZO',
+      'EMEI OLINDA MARIA DE JESUS SOUZA',
+      'EMEI PROFª. IZABEL SOSTENA DE SOUZA',
+      'EMEIEF JD. SANTA AMÉLIA (HUMBERTO DE AMORIM LOPES)',
+      'EMEIEF JOSÉ TENÓRIO DA SILVA',
+      'EMEIEF LUIZA VITÓRIA OLIVEIRA CRUZ',
+      'EMEI EMILIANO SANCHEZ',
+      'EMEI MIGUEL CAMILLO',
+      'EMEB JOSIAS DA SILVA MACEDO',
+      'EMEB RICHARD CHIBIM NAUMANN',
+      'EMEI CARLOS VILELA',
+      'EMEI JARDIM INTERLAGOS',
+      'EMEI JARDIM NOVO CAMBUÍ',
+      'EMEF JARDIM AMANDA (CAIC)',
+      'EMEF LOURENÇO DANIEL ZANARDI',
+      'EMEF FERNANDA GRAZIELLE RESENDE COVRE',
+      'EMEF PROFª. HELENA FURTADO TAKAHASHI',
+      'EMEF PROFª. JANILDE FLORES GABY DO VALE',
+      'EMEF DONA ANA JOSÉ BODINI JANUÁRIO',
+      'EMEI JARDIM NOSSA SENHORA DE FÁTIMA',
+      'EMEI JARDIM NOSSA SENHORA AUXILIADORA',
+      'EMEI JARDIM NOVA EUROPA',
+      'EMEF JARDIM PRIMAVERA',
+      'EMEI JARDIM SÃO PEDRO',
+      'EMEI JARDIM SANTA CLARA DO LAGO I',
+      'EMEI JARDIM SANTA EMILIA',
+      'EMEI JARDIM SANTA ESMERALDA',
+      'EMEI JARDIM SANTIAGO',
+      'EMEIEF JOÃO CARLOS DO AMARAL SOARES',
+      'EMEF JOÃO CALIXTO DA SILVA',
+      'EMEI JARDIM AMANDA I',
+      'EMEI JARDIM AMANDA II',
+      'EMEF MARIA CÉLIA CABRAL AMARAL',
+      'EMEF JOSÉ ROQUE (JD. BOA ESPERANÇA)',
+      'EMEF SALVADOR ZACHARIAS P. JUNIOR',
+      'EMEI JARDIM MINDA',
+      'EMEI RESIDENCIAL SÃO SEBASTIÃO II',
+      'EMEI VILA REAL (SEBASTIANA DAS DORES)',
+      'EMEI JARDIM SANTA AMÉLIA',
+      'EMEI NICOLAS THIAGO DOS SANTOS LOFRANI',
+      'EMEI VILLAGIO GUIRALDELLI',
+      'EMEI TARSILA DO AMARAL',
+      'EMEI JARDIM SANTA CLARA DO LAGO II'
+    ].sort()
+  },
+  {
+    label: 'FAMÍLIA',
+    options: [
+      'AVÓ', 'AVÔ', 'IRMÃO(A)', 'MADRASTA', 'MÃE', 'PADRASTO', 'PAI', 'TIA', 'TIO'
+    ].sort()
+  },
+  {
+    label: 'SAÚDE',
+    options: [
+      'CAPS ADULTO', 'CAPS INFANTIL', 'HOSPITAL MUNICIPAL (MÁRIO COVAS)', 'SAMU', 
+      'UBS AMANDA', 'UBS BRASIL', 'UBS CENTRAL', 'UBS NOVO ANGULO', 
+      'UBS PRIMAVERA', 'UBS SANTA IZABEL', 'UPA AMANDA', 
+      'UPA NOVA HORTOLÂNDIA', 'UPA ROSOLÉM'
+    ].sort()
+  },
+  {
+    label: 'SEGURANÇA',
+    options: [
+      'CONSELHO COMUNITÁRIO DE SEGURANÇA', 'GUARDA MUNICIPAL', 
+      'POLÍCIA CIVIL', 'POLÍCIA MILITAR'
+    ].sort()
+  },
+  {
+    label: 'ÓRGÃOS E NÚCLEOS',
+    options: [
+      'DAS', 'NAD (NÚCLEO DE AVERIGUAÇÃO DE DENÚNCIA)', 
+      'NEM (NÚCLEO EDUCACIONAL MULTIDISCIPLINAR)'
+    ].sort()
+  },
+  {
+    label: 'OUTROS',
+    options: [
+      'DENÚNCIA ESPONTÂNEA', 'DENÚNCIA TELEFÔNICA', 'DISQUE 100', 'JUDICIÁRIO'
+    ].sort()
   }
 ];
+
+export const CANAIS_COMUNICADO_LIST = [
+  'ATENDIMENTO PRESENCIAL', 'ATENDIMENTO TELEFÔNICO', 'DISQUE 100', 
+  'E-MAIL INSTITUCIONAL', 'RELATÓRIO', 'OFÍCIO', 'OFÍCIO MP', 'OFÍCIO JUDICIÁRIO'
+].sort();
 
 export type QueueCategory = 'OFICIO_TECNICO' | 'DENUNCIA_ANONIMA' | 'PRESENCIAL' | 'DIGITAL';
 
@@ -90,18 +229,49 @@ export const classifyTurno = (dateStr: string, timeStr: string): 'COMERCIAL' | '
   return (isWeekend || !isBusinessHours) ? 'PLANTAO' : 'COMERCIAL';
 };
 
-export const BAIRROS = ["CHÁCARAS ACAUÃ", "JARDIM ADELAIDE", "JARDIM AMANDA I", "JARDIM AMANDA II", "JARDIM AMANDA III", "JARDIM BRASIL", "JARDIM CENTRAL", "JARDIM NOVO ÂNGULO", "JARDIM PRIMAVERA", "JARDIM ROSOLÉM", "JARDIM SANTA CLARA", "JARDIM SANTA IZABEL", "VILA REAL"].sort();
+export const BAIRROS = [
+  "JARDIM ADELAIDE", "JARDIM AMANDA I", "JARDIM AMANDA II", "JARDIM AMANDA III", 
+  "JARDIM AMANDA IV", "JARDIM AMANDA V", "JARDIM BOA ESPERANÇA", "JARDIM BOA VISTA", 
+  "JARDIM CAMPOS VERDES", "JARDIM CARMEN CRISTINA", "CENTRO", "CHÁCARAS ASSAY", 
+  "CHÁCARAS FAZENDA COELHO", "CHÁCARAS PLANALTO", "CHÁCARAS RECREIO ALVORADA", 
+  "JARDIM DAS COLINAS", "PARQUE DOS EUCALIPTOS", "JARDIM FIRENZE", "PARQUE GABRIEL", 
+  "JARDIM GOLDEN PARK", "JARDIM GREEN PARK", "PARQUE DO HORTO", "JARDIM INTERLAGOS", 
+  "JARDIM MALTA", "JARDIM NOVA ALVORADA", "JARDIM NOVA AMÉRICA", "JARDIM NOVA EUROPA", 
+  "JARDIM NOVA HORTOLÂNDIA", "JARDIM NOVO ÂNGULO", "JARDIM NOVO CAMBUÍ", 
+  "JARDIM NOSSA SENHORA AUXILIADORA", "JARDIM NOSSA SENHORA DE FÁTIMA", 
+  "PARQUE ORTOLÂNDIA", "PARQUE ORESTES ÔNGARO", "PARQUE DOS PINHEIROS", 
+  "VILA REAL SANTISTA", "REMANSO CAMPINEIRO", "JARDIM ROSOLÉM", 
+  "JARDIM SANTA CLARA DO LAGO I", "JARDIM SANTA CLARA DO LAGO II", 
+  "JARDIM SANTA CLARA DO LAGO III", "JARDIM SANTA CLARA DO LAGO IV", 
+  "JARDIM SANTA EMÍLIA", "JARDIM SANTA ESMERALDA", "JARDIM SANTA IZABEL", 
+  "JARDIM SANTA RITA DE CÁSSIA", "JARDIM SANTA RITA II", "JARDIM SANTIAGO", 
+  "JARDIM SANTANA", "JARDIM SÃO BENTO", "JARDIM SÃO CAMILO", "JARDIM SÃO CAMILO II", 
+  "JARDIM SÃO FELIPE", "JARDIM SÃO FELIPE II", "VILA SÃO FRANCISCO", 
+  "JARDIM SÃO JORGE", "JARDIM SÃO JUDAS TADEU", "JARDIM SÃO LUIZ", 
+  "PARQUE SÃO MIGUEL", "VILA SÃO PEDRO", "JARDIM SÃO PEDRO II", 
+  "JARDIM SÃO SEBASTIÃO", "JARDIM SUMAREZINHO", "JARDIM TERRAS DE SANTO ANTÔNIO", 
+  "VILLAGIO GHIRALDELLI"
+].sort();
 
-export const CANAIS_COMUNICACAO = ['DISQUE 100', 'EMAIL INSTITUCIONAL', 'PRESENCIAL', 'OFÍCIO MP', 'OFÍCIO JUDICIÁRIO', 'SISTEMA INTEGRADO'];
-
+// DIRETRIZ 104: STATUS EM ORDEM ALFABÉTICA
 export const STATUS_LABELS: Record<string, string> = {
-  'NAO_LIDO': 'Novo Documento',
-  'EM_PREENCHIMENTO': 'Em Preenchimento (Rascunho)',
+  'AGENDAR_REUNIAO_REDE': 'Agendar Reunião de Rede',
+  'AGUARDAR_RESPOSTA_EMAIL': 'Aguardar Resposta do Email',
+  'AGUARDANDO_ANALISE': 'Aguardando Análise',
   'AGUARDANDO_VALIDACAO': 'Aguardando Validação',
-  'OFICIALIZADO': 'Oficializado',
+  'ARQUIVADO': 'Arquivado',
   'CONCLUIDO': 'Concluído',
-  'TIPIFICACAO_INCOMPLETA': 'Tipificação Incompleta',
-  'AGUARDANDO_ANALISE': 'Aguardando Análise'
+  'EMAIL_RESPONDIDO': 'Email Respondido',
+  'EM_PREENCHIMENTO': 'Em Preenchimento (Rascunho)',
+  'ENCAMINHAR_NOTICIA_FATO': 'Encaminhar Noticia de Fato',
+  'MONITORAMENTO': 'Monitoramento',
+  'NAO_LIDO': 'Novo Documento',
+  'NOTIFICAR': 'Notificar',
+  'OFICIALIZADO': 'Oficializado',
+  'OFICIO_RESPONDIDO': 'Ofício Respondido',
+  'RESPONDER_EMAIL': 'Responder Email',
+  'SOLICITAR_REUNIAO_REDE': 'Solicitar Reunião de Rede',
+  'TIPIFICACAO_INCOMPLETA': 'Tipificação Incompleta'
 };
 
 export const UNIFIED_GENDER_OPTIONS = ["Masculino (Cisgênero)", "Feminino (Cisgênero)", "Mulher Trans / Homem Trans", "Não-binário / Gênero Fluido", "Outro / Prefere não informar"];
@@ -110,7 +280,7 @@ export const AGENTES_VIOLADORES_ESTRUTURA: Record<string, { options: string[] }>
   "ESTADO": { options: ["Hospitais", "Escolas", "Postos de Saúde", "Cartórios", "Defensoria", "Judiciário", "Ministério Público", "Polícias", "Creches"] },
   "FAMÍLIA": { options: ["Mãe", "Pai", "Padrasto", "MADRASTA", "Avós", "Irmãos", "Tios", "Parentes", "Responsável Legal"] },
   "SOCIEDADE": { options: ["Vizinhos", "Empresas", "Entidades Religiosas", "Escolas Privadas", "Hospitais Privados"] },
-  "PRÓPRIA CONDUTA": { options: ["Atos da própria criança ou adolescente"] }
+  "PRÓPRIA CONDCTA": { options: ["Atos da própria criança ou adolescente"] }
 };
 
 export const MEDIDAS_101_ECA = [
@@ -133,12 +303,11 @@ export const MEDIDAS_129_ECA = [
   { id: 'VII', label: 'VII - Advertência: advertência formal registrada em termo.' }
 ];
 
-// DIRETRIZ 87: Catalogação Integral do Art. 136 ECA
 export const ATRIBUICOES_136_ECA = [
   { id: 'I', label: 'I - Atender crianças e adolescentes nas hipóteses previstas nos arts. 98 e 105, aplicando as medidas previstas no art. 101, I a VII.' },
   { id: 'II', label: 'II - Atender e aconselhar os pais ou responsável, aplicando as medidas previstas no art. 129, I a VII.' },
-  { id: 'III-a', label: 'III-a - Requisitar serviços públicos nas áreas de saúde, educação, assistência social, previdência, trabalho e segurança (Lei 15.268/2025).' },
-  { id: 'III-b', label: 'III-b - Representar junto à autoridade judiciária nos casos de descumprimento injustificado de suas deliberações.' },
+  { id: 'III-a', label: 'III-a - Requisitar serviços públicos nas áreas de saúde, education, assistência social, previdência, trabalho e segurança (Lei 15.268/2025).' },
+  { id: 'III-b', label: 'III-b - Representar junto à autoridade judiciária nos caches de descumprimento injustificado de suas deliberações.' },
   { id: 'IV', label: 'IV - Encaminhar ao Ministério Público notícia de fato que constitua infração administrativa ou penal contra os direitos da criança ou adolescente.' },
   { id: 'V', label: 'V - Encaminhar à autoridade judiciária os casos de sua competência.' },
   { id: 'VI', label: 'VI - Providenciar a medida estabelecida pela autoridade judiciária para o adolescente autor de ato infracional.' },
@@ -152,7 +321,6 @@ export const ATRIBUICOES_136_ECA = [
   { id: 'PARAGRAFO_UNICO', label: 'P. Único - Comunicação imediata ao MP em caso de afastamento do convívio familiar.' }
 ];
 
-// DIRETRIZ 85: Expansão do mapeamento da rede
 export const REDE_HORTOLANDIA = {
   'SAÚDE': {
     'HOSPITAIS': ['Hospital Municipal de Hortolândia (Mário Covas)'],
@@ -180,7 +348,6 @@ export const REDE_HORTOLANDIA = {
   }
 };
 
-// DIRETRIZ 16: TABELA EXAUSTIVA DE VIOLAÇÕES
 export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
   "CONVIVÊNCIA FAMILIAR E COMUNITÁRIA": {
     "Privação ou dificuldade de convívio": ["Omissão dever familiar", "Pensão alimentícia", "Impedimento contato pais/familiares", "Falta pais/parentes", "Subtração por familiares", "Falta/precariedade moradia", "Tráfico", "Fuga", "Abandono"],
@@ -201,7 +368,7 @@ export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
     "Educação Infantil": ["Falta vaga pré-escola/creche", "Falta equipe especializada (0-3 e 3-6 anos)", "Distância casa/creche"],
     "Ensino Fundamental/Médio": ["Falta educação bilíngue", "Falta vaga ensino regular/noturno", "Inexistência escola completa"],
     "Impedimento permanência": ["Constrangimento", "Critérios discriminatórios", "Expulsão indevida", "Punições abusivas", "Transferência compulsória", "Evasão/Infrequência (por violação)"],
-    "Falta condições educacionais": ["Ausência merenda", "Faltas professores", "Falta info frequência aos pais", "Falta material", "Falta segurança", "Falta atendimento especializado (PCD/Altas habilidades)"],
+    "Falta condições educacionais": ["Ausência merenda", "Faltas professores", "Falta material", "Falta segurança", "Falta atendimento especializado (PCD/Altas habilidades)"],
     "Cultura/Esporte/Lazer": ["Falta manutenção equipamentos", "Inexistência de espaços", "Falta programas públicos", "Impedimento de acesso"]
   },
   "PROFISSIONALIZAÇÃO E PROTEÇÃO NO TRABALHO": {
@@ -210,7 +377,7 @@ export const SIPIA_HIERARCHY: Record<string, Record<string, string[]>> = {
     "Capacitação": ["Ausência encaminhamento programas", "Não acesso formação técnica (incluindo PCD e medidas proteção)"]
   },
   "LIBERDADE, RESPEITO E DIGNIDADE": {
-    "Restrições ir e vir": ["Apreensão/Detenção/Confinamento ilegal", "Exílio forçado", "Sequestro", "Recolhimento compulsório", "Impedimento acesso logradouro"],
+    "RestRIções ir e vir": ["Apreensão/Detenção/Confinamento ilegal", "Exílio forçado", "Sequestro", "Recolhimento compulsório", "Impedimento acesso logradouro"],
     "Discriminação": ["Histórico ato infracional", "Raça/etnia", "Gênero", "Características pessoais", "Política/Ideologia", "Intolerância religiosa", "Orientação sexual/Identidade gênero", "Situação acolhimento/socioeducativo"],
     "Negação Cidadania": ["Cerceamento crença", "Violação intimidade", "Exposição imagem", "Omissão registro queixa", "Falta Registro Civil", "Omissão autoridade perante ameaça", "Violência patrimonial"],
     "Violência Psicológica": ["Tortura", "Tratamento cruel", "Humilhação", "Agressão verbal", "Cyberbullying"],

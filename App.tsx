@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2, History } from 'lucide-react';
+import { LayoutDashboard, LogOut, FilePlus, Database, BarChart3, CalendarDays, Briefcase, UserCog, X, Repeat, AlertCircle, ShieldCheck, CheckCircle2, Zap, ClipboardCheck, ArrowRight, Activity, Lock, Users, Heart, GraduationCap, Building2, History, BellRing, TriangleAlert } from 'lucide-react';
 import { User, Documento, Log, LogType, DocumentFile, AgendaEntry, DocumentStatus, MonitoringInfo, MedidaAplicada } from './types';
 import { INITIAL_USERS, UserWithPassword } from './constants';
 import DocumentList from './components/DocumentList';
@@ -138,10 +138,20 @@ const App: React.FC = () => {
     setLogs(prev => [newLog, ...prev]);
   }, [currentUser]);
 
-  // DIRETRIZ 91.2: LIBERDADE IRRESTRITA DE LOGOFF
+  const pendingValidations = useMemo(() => {
+    if (!currentUser || currentUser.perfil !== 'CONSELHEIRO') return [];
+    return documents.filter(d => {
+       const isAwaiting = d.status.includes('AGUARDANDO_VALIDACAO');
+       const inTrio = d.conselheiros_providencia_nomes?.includes(currentUser.nome.toUpperCase());
+       const alreadyValidated = d.medidas_detalhadas?.some(m => 
+         m.confirmacoes?.some(c => c.usuario_id === currentUser.id)
+       );
+       return isAwaiting && inTrio && !alreadyValidated;
+    });
+  }, [documents, currentUser]);
+
   const handleLogout = () => {
     const confirmSave = window.confirm("Deseja salvar as alterações pendentes em rascunho antes de sair?");
-    // O sistema apenas salvará o que estiver em rascunho e encerrará a sessão imediatamente.
     addLog('SISTEMA', `Efetuou Logoff (Salvamento Rascunho: ${confirmSave ? 'SIM' : 'NÃO'})`, 'SEGURANÇA');
     setCurrentUser(null);
     setSelectedDocId(null);
@@ -210,8 +220,8 @@ const App: React.FC = () => {
       return null;
     }
 
-    if (activeTab === 'register') return <DocumentRegistration documents={documents} currentUser={currentUser} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} nextCouncilorId="" />;
-    if (activeTab === 'edit' && editingDocId) return <DocumentRegistration documents={documents} currentUser={currentUser} initialData={documents.find(d => d.id === editingDocId)} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} nextCouncilorId="" />;
+    if (activeTab === 'register') return <DocumentRegistration documents={documents} currentUser={currentUser} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} />;
+    if (activeTab === 'edit' && editingDocId) return <DocumentRegistration documents={documents} currentUser={currentUser} initialData={documents.find(d => d.id === editingDocId)} onSubmit={handleDocumentSubmit} onCancel={() => handleNavigate('dashboard')} />;
     
     if (selectedDocId) {
       const doc = documents.find(d => d.id === selectedDocId);
@@ -228,16 +238,33 @@ const App: React.FC = () => {
 
     switch (activeTab) {
       case 'dashboard': 
-        const dashboardDocs = documents.filter(d => {
-          if (d.status.includes('EM_PREENCHIMENTO')) {
-            return d.conselheiro_referencia_id === currentUser.id;
-          }
-          return true;
-        });
-        return <DocumentList documents={dashboardDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={handleOpenDocument} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
-            addLog(id, `EXCLUSÃO: Documento removido permanentemente via Painel Geral.`, 'DOCUMENTO');
-            setDocuments(prev => prev.filter(d => d.id !== id));
-        }} onScience={() => {}} onUpdateStatus={() => {}} />;
+        return (
+          <div className="space-y-6">
+            {pendingValidations.length > 0 && (
+              <div 
+                className="p-6 bg-red-600 rounded-[2rem] border-4 border-red-500 shadow-2xl animate-pulse flex items-center justify-between group hover:scale-[1.01] transition-all cursor-pointer" 
+                onClick={() => handleOpenDocument(pendingValidations[0].id, true)}
+              >
+                 <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                       <BellRing className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                       <h3 className="text-white font-black text-[18px] uppercase tracking-tight">Validação Pendente no Colegiado!</h3>
+                       <p className="text-white/80 text-[12px] font-bold uppercase tracking-widest mt-1">Você possui {pendingValidations.length} {pendingValidations.length === 1 ? 'procedimento aguardando' : 'procedimentos aguardando'} sua assinatura técnica.</p>
+                    </div>
+                 </div>
+                 <div className="px-6 py-3 bg-white text-red-600 rounded-xl font-black text-[11px] uppercase tracking-widest flex items-center gap-2">
+                    Validar Agora <ArrowRight className="w-4 h-4" />
+                 </div>
+              </div>
+            )}
+            <DocumentList documents={documents} currentUser={currentUser} isReadOnly={false} onSelectDoc={handleOpenDocument} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
+                addLog(id, `EXCLUSÃO: Documento removido permanentemente via Painel Geral.`, 'DOCUMENTO');
+                setDocuments(prev => prev.filter(d => d.id !== id));
+            }} onScience={() => {}} onUpdateStatus={() => {}} />
+          </div>
+        );
       
       case 'my-docs':
         const myReferencedDocs = documents.filter(d => {
@@ -248,7 +275,7 @@ const App: React.FC = () => {
         return <DocumentList documents={myReferencedDocs} currentUser={currentUser} isReadOnly={false} onSelectDoc={(id) => handleOpenDocument(id, true)} onEditDoc={(id) => { setEditingDocId(id); setActiveTab('edit'); }} onDeleteDoc={(id) => {
             addLog(id, `EXCLUSÃO: Documento removido permanentemente via Minha Referência.`, 'DOCUMENTO');
             setDocuments(prev => prev.filter(d => d.id !== id));
-        }} onScience={() => {}} onUpdateStatus={() => {}} />;
+        }} onScience={() => {}} onUpdateStatus={() => {}} isMyReferenceView={true} />;
       
       case 'monitoring': return <MonitoringDashboard documents={documents} currentUser={currentUser} effectiveUserId={currentUser.id} onSelectDoc={handleOpenDocument} onAddLog={addLog} onUpdateMonitoring={(id, m) => { 
           setDocuments(prev => prev.map(d => d.id === id ? {...d, monitoramento: m} : d)); 
@@ -340,7 +367,7 @@ const App: React.FC = () => {
           <NavItem icon={<BarChart3 className="w-5 h-5" />} label="Relatórios" active={activeTab === 'statistics'} onClick={() => handleNavigate('statistics'} collapsed={!isSidebarOpen} />
           <NavItem icon={<ShieldCheck className="w-5 h-5" />} label="Minha Senha" active={activeTab === 'settings'} onClick={() => handleNavigate('settings'} collapsed={!isSidebarOpen} />
           {currentUser.nome === 'LUDIMILA' && <NavItem icon={<UserCog className="w-5 h-5" />} label="Gestão de RH" active={activeTab === 'user-management'} onClick={() => handleNavigate('user-management')} collapsed={!isSidebarOpen} />}
-          {isLud && <NavItem icon={<History className="w-5 h-5" />} label="Audit Log" active={activeTab === 'logs'} onClick={() => handleNavigate('logs')} collapsed={!isSidebarOpen} />}
+          {isLud && <NavItem icon={<History className="w-5 h-5" />} label="Audit Log" active={activeTab === 'logs'} onClick={() => handleNavigate('logs'} collapsed={!isSidebarOpen} />}
         </nav>
         <div className="p-4 border-t border-white/5">
           <NavItem icon={<LogOut className="w-5 h-5" />} label="Sair" active={false} onClick={handleLogout} collapsed={!isSidebarOpen} danger />
@@ -349,7 +376,7 @@ const App: React.FC = () => {
       <main className={`flex-1 ${isSidebarOpen ? 'ml-80' : 'ml-24'} transition-all min-h-screen`}>
         <div className="p-8">
           <header className="flex items-center justify-between mb-12">
-            <div><h2 className="text-[13px] font-medium text-[#4B5563] uppercase tracking-widest">Gestão Papel Zero Hortolândia</h2><div className="flex items-center gap-2 mt-1"><span className="text-[16px] font-semibold text-[#111827] uppercase">{currentUser.nome}</span><span className="text-[14px] font-medium text-[#2563EB] uppercase">({currentUser.cargo})</span></div></div>
+            <div><h2 className="text-[13px] font-medium text-[#4B5563] uppercase tracking-widest">ZELAR PELO CUMPRIMENTO DO DIREITO</h2><div className="flex items-center gap-2 mt-1"><span className="text-[16px] font-semibold text-[#111827] uppercase">{currentUser.nome}</span><span className="text-[14px] font-medium text-[#2563EB] uppercase">({currentUser.cargo})</span></div></div>
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-3 bg-white border border-[#E5E7EB] rounded-xl shadow-sm hover:bg-slate-50">{isSidebarOpen ? <X className="w-5 h-5" /> : <LayoutDashboard className="w-5 h-5" />}</button>
           </header>
           {renderContent()}
