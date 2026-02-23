@@ -1,64 +1,105 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
+// SIMCT HORTOLÂNDIA - VERSÃO INTEGRADA E ESTÁVEL
 export default function App() {
-  // Estado para controlar qual aba está ativa: 'registro' ou 'relatorios'
   const [abaAtiva, setAbaAtiva] = useState('registro');
 
+  // Cores do Projeto das Fotos
+  const CORES = {
+    primaria: '#111827', // Azul Escuro/Preto das fotos
+    secundaria: '#2563EB', // Azul Royal
+    sucesso: '#10B981', // Verde
+    alerta: '#EF4444', // Vermelho
+    fundo: '#F3F4F6'
+  };
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#f0f4f8', minHeight: '100vh' }}>
-      <header style={{ backgroundColor: '#004a99', color: 'white', padding: '15px', borderRadius: '12px', textAlign: 'center', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0 }}>SICT - HORTOLÂNDIA</h1>
+    <div style={{ backgroundColor: CORES.fundo, minHeight: '100vh', fontFamily: 'sans-serif' }}>
+      {/* HEADER IDÊNTICO ÀS FOTOS */}
+      <header style={{ backgroundColor: CORES.primaria, color: 'white', padding: '30px', textAlign: 'center', borderRadius: '0 0 40px 40px', boxShadow: '0 10px 15px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900', letterSpacing: '2px' }}>SICT - HORTOLÂNDIA</h1>
+        <p style={{ margin: '5px 0 0', opacity: 0.6, fontSize: '10px', fontWeight: 'bold' }}>SISTEMA INTEGRADO MUNICIPAL DO CONSELHO TUTELAR</p>
       </header>
 
-      {/* MENU DE NAVEGAÇÃO */}
-      <nav style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        <button 
-          onClick={() => setAbaAtiva('registro')}
-          style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: abaAtiva === 'registro' ? '#004a99' : '#ccc', color: 'white', fontWeight: 'bold' }}
-        >
-          📝 NOVO REGISTRO
-        </button>
-        <button 
-          onClick={() => setAbaAtiva('relatorios')}
-          style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: abaAtiva === 'relatorios' ? '#004a99' : '#ccc', color: 'white', fontWeight: 'bold' }}
-        >
-          📊 RELATÓRIOS
-        </button>
-      </nav>
+      <div style={{ maxWidth: '1100px', margin: '20px auto', padding: '0 20px' }}>
+        
+        {/* MENU DE NAVEGAÇÃO - ABAS */}
+        <nav style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+          <button 
+            onClick={() => setAbaAtiva('registro')}
+            style={{ flex: 1, padding: '18px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontWeight: '900', transition: '0.3s', backgroundColor: abaAtiva === 'registro' ? CORES.secundaria : 'white', color: abaAtiva === 'registro' ? 'white' : '#6B7280', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}
+          >
+            📝 NOVO REGISTRO
+          </button>
+          <button 
+            onClick={() => setAbaAtiva('relatorios')}
+            style={{ flex: 1, padding: '18px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontWeight: '900', transition: '0.3s', backgroundColor: abaAtiva === 'relatorios' ? CORES.secundaria : 'white', color: abaAtiva === 'relatorios' ? 'white' : '#6B7280', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}
+          >
+            📊 RELATÓRIOS & INTELIGÊNCIA
+          </button>
+        </nav>
 
-      {/* CONTEÚDO DA ABA: RELATÓRIOS */}
-      {abaAtiva === 'relatorios' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', animation: 'fadeIn 0.5s' }}>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '10px', textAlign: 'center', borderTop: '5px solid #004a99' }}>
-            <h4 style={{ margin: 0, color: '#555' }}>👶 1ª INFÂNCIA (0-6)</h4>
-            <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '10px 0', color: '#004a99' }}>0</p>
-          </div>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '10px', textAlign: 'center', borderTop: '5px solid #004a99' }}>
-            <h4 style={{ margin: 0, color: '#555' }}>👦 CRIANÇAS (7-12)</h4>
-            <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '10px 0', color: '#004a99' }}>0</p>
-          </div>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '10px', textAlign: 'center', borderTop: '5px solid #004a99' }}>
-            <h4 style={{ margin: 0, color: '#555' }}>🧑 ADOLESCENTES</h4>
-            <p style={{ fontSize: '32px', fontWeight: 'bold', margin: '10px 0', color: '#004a99' }}>0</p>
-          </div>
-        </div>
-      )}
-
-      {/* CONTEÚDO DA ABA: NOVO REGISTRO */}
-      {abaAtiva === 'registro' && (
-        <div style={{ background: 'white', padding: '25px', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ marginTop: 0 }}>📝 FORMULÁRIO DE ENTRADA</h3>
-          <div style={{ display: 'grid', gap: '15px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Data e Hora:</label>
-              <input type="datetime-local" style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+        {/* ABA: RELATÓRIOS (O QUE VOCÊ ME MANDOU NO BLOCO DE NOTAS) */}
+        {abaAtiva === 'relatorios' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+              <div style={{ background: 'white', padding: '30px', borderRadius: '30px', textAlign: 'center', borderTop: `8px solid ${CORES.secundaria}`, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <h4 style={{ color: '#4B5563', fontSize: '12px', fontWeight: '900' }}>👶 1ª INFÂNCIA (0-6)</h4>
+                <p style={{ fontSize: '32px', fontWeight: '900', color: CORES.primaria, margin: '10px 0' }}>0</p>
+              </div>
+              <div style={{ background: 'white', padding: '30px', borderRadius: '30px', textAlign: 'center', borderTop: `8px solid ${CORES.secundaria}`, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <h4 style={{ color: '#4B5563', fontSize: '12px', fontWeight: '900' }}>👦 CRIANÇAS</h4>
+                <p style={{ fontSize: '32px', fontWeight: '900', color: CORES.primaria, margin: '10px 0' }}>0</p>
+              </div>
+              <div style={{ background: 'white', padding: '30px', borderRadius: '30px', textAlign: 'center', borderTop: `8px solid ${CORES.secundaria}`, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <h4 style={{ color: '#4B5563', fontSize: '12px', fontWeight: '900' }}>🧑 ADOLESCENTES</h4>
+                <p style={{ fontSize: '32px', fontWeight: '900', color: CORES.primaria, margin: '10px 0' }}>0</p>
+              </div>
             </div>
-            <button style={{ backgroundColor: '#28a745', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', fontWeight: 'bold' }}>
-              💾 SALVAR
-            </button>
+
+            {/* SEÇÃO DE INTELIGÊNCIA */}
+            <div style={{ backgroundColor: CORES.primaria, color: 'white', padding: '40px', borderRadius: '40px', marginTop: '20px' }}>
+              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900' }}>🛡️ CENTRO DE INTELIGÊNCIA SIMCT</h3>
+              <p style={{ opacity: 0.5, fontSize: '11px', marginTop: '5px' }}>AUDITORIA E DOSSIÊ FAMILIAR CRUZADO</p>
+              <div style={{ marginTop: '30px', padding: '20px', border: '2px dashed rgba(255,255,255,0.2)', borderRadius: '20px', textAlign: 'center' }}>
+                <p style={{ fontSize: '12px', fontWeight: 'bold' }}>AGUARDANDO SELEÇÃO DE PRONTUÁRIO PARA ANÁLISE DE REINCIDÊNCIA...</p>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* ABA: REGISTRO (FORMULÁRIO DAS FOTOS) */}
+        {abaAtiva === 'registro' && (
+          <div style={{ background: 'white', padding: '40px', borderRadius: '40px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '1px solid #E5E7EB' }}>
+            <h3 style={{ marginTop: 0, fontSize: '16px', fontWeight: '900', color: CORES.primaria, borderBottom: '2px solid #F3F4F6', paddingBottom: '15px', marginBottom: '25px' }}>📝 FORMULÁRIO DE ENTRADA</h3>
+            
+            <div style={{ display: 'grid', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#6B7280', marginBottom: '8px' }}>DATA E HORA DO RECEBIMENTO</label>
+                <input type="datetime-local" style={{ width: '100%', padding: '15px', borderRadius: '15px', border: '2px solid #F3F4F6', outline: 'none', fontWeight: 'bold' }} />
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '900', color: '#6B7280', marginBottom: '8px' }}>ORIGEM DO COMUNICADO (HORTOLÂNDIA)</label>
+                <select style={{ width: '100%', padding: '15px', borderRadius: '15px', border: '2px solid #F3F4F6', outline: 'none', fontWeight: 'bold', appearance: 'none' }}>
+                  <option>SELECIONE A INSTITUIÇÃO...</option>
+                  <option>EDUCAÇÃO MUNICIPAL</option>
+                  <option>SAÚDE (UBS/HOSPITAL)</option>
+                  <option>SEGURANÇA PÚBLICA (PM/GM)</option>
+                </select>
+              </div>
+
+              <button style={{ backgroundColor: CORES.sucesso, color: 'white', padding: '20px', borderRadius: '20px', border: 'none', fontWeight: '900', cursor: 'pointer', fontSize: '14px', marginTop: '10px', boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>
+                💾 SALVAR REGISTRO NO SICT
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <footer style={{ textAlign: 'center', padding: '40px', opacity: 0.4, fontSize: '10px', fontWeight: '900', color: '#6B7280' }}>
+        CENTRAL DE DADOS SICT - SEGURANÇA JURÍDICA INSTITUCIONAL
+      </footer>
     </div>
   );
 }
