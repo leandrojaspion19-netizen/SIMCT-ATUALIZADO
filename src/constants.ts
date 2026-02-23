@@ -1,3 +1,4 @@
+
 import { User, Documento, Log, ViolenceType } from './types';
 
 export interface UserWithPassword extends User {
